@@ -1,6 +1,9 @@
 import re
 import json
 
+# Scraper bot to get names from a wikipedia markup of a list, uses regex to check within list and save 
+# in JSON formatting to be used as a dictionary in the spell check and perhaps OCR 
+
 def scrape(filename):
     scrapedwords = {}
     f = open(filename, "r")

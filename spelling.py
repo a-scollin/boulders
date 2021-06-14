@@ -1,5 +1,7 @@
 from spellchecker import SpellChecker
 
+# Bot that will take a local dictionary and language to train on word frequency to 
+# mitigate the OCRs errors..
 
 class correction(SpellChecker):
         

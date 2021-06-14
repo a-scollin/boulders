@@ -5,6 +5,8 @@ import argparse
 import cv2
 import os
 
+# Very simple set of functions for running the OCR from PIL image,
+# will include methods for training the OCR model once verification data is made 
 
 def read_image_to_df(image):
     text = pytesseract.image_to_data(image, output_type='data.frame')
