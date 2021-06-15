@@ -4,11 +4,12 @@ from PIL import Image
 from spellchecker import SpellChecker
 import pandas as pd
 import re
-
+import NLP_helper
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
 
 def review_vol_3():
+
     images = convert_from_path("./bouldercopies/3_Report_14_06.pdf", 500)
     
     words = ""  
@@ -22,10 +23,11 @@ def review_vol_3():
             words += word.array[0] + " "
 
        
-    ma = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",words)
+    matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",words)
 
-    for match in ma:
-        print(match)
+    for match in matches:
+        if len(match[1]) > 5:
+            NLP_helper.find_boulder(match)
 
     
 def print_all_volumes():
