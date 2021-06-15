@@ -3,10 +3,31 @@ import OCR_helper as OCR
 from PIL import Image
 from spellchecker import SpellChecker
 import pandas as pd
+import re
 
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
 
+def review_vol_3():
+    images = convert_from_path("./bouldercopies/3_Report_14_06.pdf", 500)
+    
+    words = ""  
+    
+    for image in images:
+        
+        data = OCR.read_image_to_df(image)
+
+        for index in data.index:
+            word = data[data.index == index]["text"]
+            words += word.array[0] + " "
+
+       
+    ma = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",words)
+
+    for match in ma:
+        print(match)
+
+    
 def print_all_volumes():
     for i in range(3,8):
         images = convert_from_path("./bouldercopies/" + str(i) + "_Report_14_06.pdf", 500)    
@@ -18,9 +39,10 @@ def print_one_volume(number):
     for image in images:
         OCR.print_from_image(image)
 
-# The function below is a primitive spellchecker, it currently overextends to correct punctuation which should be an easy fix
+# The function below is a primitive spellchecker, it currently overextends to correct 
+# punctuation which should be an easy fix but also isn't the main goal right now
 
-def attempt_spellcheck(number):
+def attempt_spellcheck_on_volume(number):
     
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report_14_06.pdf", 500)
     words = []    
@@ -38,6 +60,9 @@ def attempt_spellcheck(number):
         for char in word :
             if not (char.isalpha()):
                 break
+        # Might not work
         if char.isalpha():
             print(word)
             print(spell.correction(word))
+        
+review_vol_3()

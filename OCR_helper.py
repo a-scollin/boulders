@@ -12,6 +12,7 @@ import numpy as np
 
 def read_image_to_df(image):
     text = pytesseract.image_to_data(OCR_pre_process_image(image), output_type='data.frame')
+    
     return text[text.conf != -1]
 
 def print_from_image(image):
@@ -48,6 +49,7 @@ def OCR_pre_process_image(image):
     # cv2.imshow("denoised",clean)
     # cv2.imshow("denoised + thinned",erosion)
     # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return Image.fromarray(erosion)
    
