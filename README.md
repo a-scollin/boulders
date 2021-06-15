@@ -1,6 +1,6 @@
 # boulders !
 
-- 14/06 
+"14/06" 
 
 Added a few components to make the software more sophisticated before attempting to apply NLP techniques.
 
@@ -8,7 +8,7 @@ Added a few components to make the software more sophisticated before attempting
 
 + I thought I'd start incorporating a simple spellchecker. By scraping wikipedia articles we will be able to build a dictionary of many scottish lochs which would be useful for later down the line when we encounter spelling mistakes from italics. Will work on lower confidence guesses from the OCR.
 
-- 15/06
+"15/06"
 
 Started applying NLP techniques and added preprocessing and more regex 
 
