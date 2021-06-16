@@ -25,10 +25,25 @@ def review_vol_3():
        
     matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",words)
 
+    numbers = []
+
+    locations = []
+
+    sizes = []
+ 
     for match in matches:
         if len(match[1]) > 5:
-            NLP_helper.find_boulder(match)
+            number, location, size = NLP_helper.find_boulder_from_numbered_regex(match)
+            
+            numbers.append(number)
+            locations.append(location)
+            sizes.append(size)
 
+    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes}
+    
+    df = pd.DataFrame(data=d)
+
+    print(df)
     
 def print_all_volumes():
     for i in range(3,8):
