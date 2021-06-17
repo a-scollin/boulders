@@ -15,7 +15,7 @@ schistose
 slate 
 basalt 
 granite 
-boydstone
+
 sienitic 
 trap 
 tuff 

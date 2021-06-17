@@ -20,15 +20,19 @@ def get_spellchecked_volume(number):
     corrections = attempt_spellcheck_on_volume(unchecked_words)
 
     for word_correction in corrections:
-
         for df in word_data:
+            df = df.replace([word_correction[0]],word_correction[1])
+
+    word_string = ""
+
+    for df in word_data:
+        for index in df.index:
+            word = df[df.index == index]["text"]
+            word_string += word.array[0] + " "
             
-            if not df.loc[df['text'] == word_correction[0]].empty:
-                print(len(df.loc[df['text'] == word_correction[0]]))
-                    
         
-    
-    return word_data
+
+    return word_data, word_string
     
 
 

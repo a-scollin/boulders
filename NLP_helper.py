@@ -23,6 +23,8 @@ def find_boulder_from_numbered_regex(match):
 
     location = None
 
+    rocktype = None
+
     for sentence in sentences:
 
         flair_sentence = Sentence(sentence)
@@ -35,11 +37,14 @@ def find_boulder_from_numbered_regex(match):
 
         if size is None:
             size = find_size(flair_sentence,sentence)
+        
+        if rocktype is None:
+            rocktype = find_rocktype(flair_sentence,sentence)
     
-        if size and location:
+        if size and location and rocktype:
             break
 
-    return number, location, size
+    return number, location, size, rocktype
 
 
 def find_size(flair_sentence,sentence):
@@ -53,8 +58,25 @@ def find_size(flair_sentence,sentence):
     else: 
         
         return size
-    
 
+def find_rocktype(flair_sentence, sentence):
+
+    rocktypes = []    
+
+    with open('./dictionaries/rocktypes.txt', 'r') as f:
+        for line in f:
+            word = ""
+            for char in line:
+                if char.isalpha():
+                    word += char
+            if len(word):
+                rocktypes.append(word)           
+
+    if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
+        for rocktype in rocktypes:
+            if rocktype.casefold() in sentence.casefold():
+                return rocktype
+        
 
 
 def find_location(flair_sentence,sentence):    

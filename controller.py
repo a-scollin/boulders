@@ -11,9 +11,9 @@ from pdf2image import convert_from_path
 
 def review_vol(number):
 
-    words = SPL.get_spellchecked_volume(number)
+    word_data, word_string = SPL.get_spellchecked_volume(number)
        
-    matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",words)
+    matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",word_string)
 
     numbers = []
 
@@ -21,15 +21,18 @@ def review_vol(number):
 
     sizes = []
  
+    rocktypes = []
+
     for match in matches:
         if len(match[1]) > 5:
-            number, location, size = NLP_helper.find_boulder_from_numbered_regex(match)
+            number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
             
             numbers.append(number)
             locations.append(location)
             sizes.append(size)
+            rocktypes.append(rocktype)
 
-    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes}
+    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes}
     
     df = pd.DataFrame(data=d)
 
@@ -49,4 +52,4 @@ def print_one_volume(number):
 # The function below is a primitive spellchecker, it currently overextends to correct 
 # punctuation which should be an easy fix but also isn't the main goal right now
 
-review_vol(input("Please input number of report to review."))
+review_vol(input("Please input number of report to review : "))
