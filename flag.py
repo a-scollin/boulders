@@ -2,12 +2,6 @@ import pygame
 from PIL import Image
 from pdf2image import convert_from_path
 
-
-
-
-
-
-
 # WIP pygame window for verifying tesseract OCR guesses, will be used in near future
 # to build a set of training data specific to the boulder reports. 
 
