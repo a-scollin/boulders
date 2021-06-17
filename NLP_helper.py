@@ -74,9 +74,10 @@ def find_rocktype(flair_sentence, sentence):
 
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for rocktype in rocktypes:
-            if rocktype.casefold() in sentence.casefold():
+            ma = re.search(r'\b' + rocktype.casefold() + r'\b', sentence.casefold())
+            if ma:
                 return rocktype
-        
+
 
 
 def find_location(flair_sentence,sentence):    

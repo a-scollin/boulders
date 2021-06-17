@@ -3,6 +3,7 @@ from pdf2image import convert_from_path
 import OCR_helper as OCR
 from spellchecker import SpellChecker
 import pandas as pd
+import string
 
 def get_spellchecked_volume(number):
 
@@ -19,9 +20,20 @@ def get_spellchecked_volume(number):
 
     corrections = attempt_spellcheck_on_volume(unchecked_words)
 
+    # Corrections ^^ works very well but actually making the swaps \/ doens't idk why  
+
+    check = []
+
     for word_correction in corrections:
         for df in word_data:
             df = df.replace([word_correction[0]],word_correction[1])
+          
+            for word in df["text"]:
+                check.append(word)
+
+    if check == unchecked_words:
+        print("They're the same") 
+    
 
     word_string = ""
 
@@ -30,7 +42,9 @@ def get_spellchecked_volume(number):
             word = df[df.index == index]["text"]
             word_string += word.array[0] + " "
             
-        
+    with open('report_text.txt', 'w') as f:
+        f.write(word_string + "\nCorrections made :\n" + str(corrections))
+
 
     return word_data, word_string
     
@@ -57,6 +71,9 @@ def attempt_spellcheck_on_volume(words):
 
     spell.word_frequency.load_words(safewords)
 
+    # Problematic word :P
+    spell.word_frequency.remove_words(['geiss'])
+
 
     # find those words that may be misspelled
     misspelled = spell.unknown(words)
@@ -71,6 +88,14 @@ def attempt_spellcheck_on_volume(words):
         # Might not work
         if (char.isalpha() or char.isnumeric()):
             corrections.append((word,spell.correction(word)))
+        else:
+            if any(char.isalpha() for char in word):
+                word_with_punc = word
+                word.translate(str.maketrans('', '', string.punctuation))
+                miss = spell.unknown(word)
+                if miss:
+                    corrections.append((word_with_punc,spell.correction(word)))
+
 
     return corrections
 
