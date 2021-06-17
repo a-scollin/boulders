@@ -7,7 +7,7 @@ from flair.models import SequenceTagger
 
 
 # load the NER tagger
-tagger = SequenceTagger.load('ner')
+tagger = MultiTagger.load(['pos','ner'])
 
 def find_boulder_from_numbered_regex(match):
 
