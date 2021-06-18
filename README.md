@@ -17,3 +17,27 @@ Started applying NLP techniques and added preprocessing and more regex
 + Added a function in OCR_helper which pre processes each page before being OCR'ed.. I think this will increase the accuracy of the OCR by alot meaning once the spell checker has ran through there should be little error meaning the OCR may not need trained!  
 
 + Started using alot of regex to pick out the numbered boulders and their sizes.. More work to be done for looking up sizes however as alot of them are stated in english which will require more NLP. 
+
+"16-18/06"
+
++ Fixed the spellchecker and started adding some interesting terms to increase the accuracy, the custom dictionary and spellchecker works seemingly quite well just from inspecting the corrections the system makes.
+
++ I cleaned up the code a bit, it could definitly use some comments though, so I'll probably do that over the weekend. 
+
++ Researched the flair NLP library and NLP in general, I think right now a better idea than making a generalised unsupervised model that magically does everything, is to start making training data for the named entity recognition that would be able to recognise **different boulders** mentioned in the same body of text. https://medium.com/thecyphy/training-custom-ner-model-using-flair-df1f9ea9c762 I'm still not sure if I can introduce new tags into the NER labeling and it's quite hard to wrap my head around but I think with more research it will work well. This will be very important for the boulders that aren't numbered as the current system wouldn't even consider them. It is also useful for ambiguity in numbered boulders when other smaller boulders are mentioned.
+
++ I had a few ideas about how to retrieve more accurate size, location and rocktype data as well:
+
+Size
+===
+After looking at the records more I notice that the sizes are usually mentioned either in the first sentence or in a sentence of their own, this means I can just look for key words like height, length, width or breadth and flag the sentence to be considered for a special size analysis within the find_size function. This should be simple enough to do from the way I've laid out each function and class. 
+
+Location
+===
+Although I've improved the accuracy of the location selection from the named entity recognition, some locations are far too broad.. for example they just describe the area of one of the boulders as Ayrshire which is massive. To remedy this I was thinking of doing the same thing for compass directions as above, where I would flag up sentences mentioning NW N .viz and such. This is a simple solution and hopefully should be easy to implement, however there is another challenge with contextual locations, 3/13 boulders mentioned in the 3rd report have locations referenced from other paragaphs, ie they mention "along the same path" or "this place" which is quite hard to determine, I think these will have to be self validated in the end unless I get a really good idea. 
+
+Rocktype
+===
+The hardest part with getting accurate rock types is when multiple boulders or landscapes are mentioned in the same sentence, usually choosing the first mentioned rock type will get the boulder in questions rock type however this isn't always the case, especially when talking about a boulder on some clay terrain where the 1800's way of speaking even confuses me. I was thinking of making a rating system based on word frequencies in which - down the line - after multiple volumes have been scanned, the script from each can be filtered by rock type and word apperences (frequencies) to get the most common boulder types, then any collisions in rating can just be manually decided.    
+
+These ideas won't take too long to implement but they will take a while to perfect, and as these are the three main features of the boulder they are very important to classify accurately. 
