@@ -25,16 +25,11 @@ def get_spellchecked_volume(number):
     check = []
 
     for word_correction in corrections:
+        if word_correction[0] == 'x':
+            continue 
         for df in word_data:
-            df = df.replace([word_correction[0]],word_correction[1])
+            df["text"] = df["text"].replace([word_correction[0]],word_correction[1])
           
-            for word in df["text"]:
-                check.append(word)
-
-    if check == unchecked_words:
-        print("They're the same") 
-    
-
     word_string = ""
 
     for df in word_data:

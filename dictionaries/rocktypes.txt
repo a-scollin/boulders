@@ -2,11 +2,11 @@ breccia
 clay 
 conglomerate 
 ironstone 
-Old Red Sandstone 
+old red sandstone 
 sand 
 sandstone 
 shale 
-Silurian rock 
+silurian rock 
 turf 
 gneiss 
 quartzite 
@@ -19,7 +19,7 @@ granite
 sienitic 
 trap 
 tuff 
-Whinstone 
+whinstone 
 porphyry 
 whin 
 greenstone 

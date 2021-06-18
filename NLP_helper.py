@@ -4,7 +4,7 @@ import flair
 from flair.data import Sentence
 from flair.models import MultiTagger
 from flair.models import SequenceTagger
-
+from flair.tokenization import SegtokSentenceSplitter
 
 # load the NER tagger
 tagger = MultiTagger.load(['pos','ner'])
@@ -13,11 +13,17 @@ def find_boulder_from_numbered_regex(match):
 
     number = match[0] 
         
-    paragraph = match[1]
+    paragraph = match[1]  
 
-    sentences = paragraph.split('.')
 
-    sentences = [sentence for sentence in sentences if len(sentence) > 5]
+    print(match)
+    
+
+    # initialize sentence splitter
+    splitter = SegtokSentenceSplitter()
+
+    # use splitter to split text into list of sentences
+    sentences = splitter.split(paragraph)
 
     size = None
 
@@ -25,21 +31,19 @@ def find_boulder_from_numbered_regex(match):
 
     rocktype = None
 
-    for sentence in sentences:
-
-        flair_sentence = Sentence(sentence)
+    for flair_sentence in sentences:
         
-        # predict NER tags
+        # predict NER and POS tags
         tagger.predict(flair_sentence)
 
         if location is None:
-            location = find_location(flair_sentence,sentence)
+            location = find_location(flair_sentence,flair_sentence.to_original_text())
 
         if size is None:
-            size = find_size(flair_sentence,sentence)
+            size = find_size(flair_sentence,flair_sentence.to_original_text())
         
         if rocktype is None:
-            rocktype = find_rocktype(flair_sentence,sentence)
+            rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
     
         if size and location and rocktype:
             break
@@ -61,7 +65,8 @@ def find_size(flair_sentence,sentence):
 
 def find_rocktype(flair_sentence, sentence):
 
-    rocktypes = []    
+    rocktypes = [] 
+
 
     with open('./dictionaries/rocktypes.txt', 'r') as f:
         for line in f:
@@ -72,24 +77,20 @@ def find_rocktype(flair_sentence, sentence):
             if len(word):
                 rocktypes.append(word)           
 
+
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
-        for rocktype in rocktypes:
-            ma = re.search(r'\b' + rocktype.casefold() + r'\b', sentence.casefold())
-            if ma:
-                return rocktype
+        for word in sentence.split(" "):
+            if word.casefold() in rocktypes:
+                return word
 
 
 
 def find_location(flair_sentence,sentence):    
     location = None
+    for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
+        for label in entity["labels"]:
+            if "LOC" in label.value:
+                return entity["text"]
+
     
-    for i in range(0,len(flair_sentence)):
-        if str(flair_sentence[i].get_tag('ner').value) == "S-LOC":
-            location = sentence
-    
-    if location is None:
-        for i in range(0,len(flair_sentence)):
-            if str(flair_sentence[i].get_tag('ner').value[2:]) == "LOC":
-                location = sentence
-    
-    return location
+ 

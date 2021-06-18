@@ -3,6 +3,7 @@ import OCR_helper as OCR
 from PIL import Image
 import SPL_helper as SPL
 import pandas as pd
+import sys
 import re
 import NLP_helper
 import json
@@ -11,7 +12,11 @@ from pdf2image import convert_from_path
 
 def review_vol(number):
 
+    print("Reviewing volume : " + str(number))
+    print("Running OCR and Spellchecker...")
+
     word_data, word_string = SPL.get_spellchecked_volume(number)
+       
        
     matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",word_string)
 
@@ -23,8 +28,12 @@ def review_vol(number):
  
     rocktypes = []
 
+    print("Running NLP...")
+
     for match in matches:
         if len(match[1]) > 5:
+
+
             number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
             
             numbers.append(number)
@@ -36,7 +45,13 @@ def review_vol(number):
     
     df = pd.DataFrame(data=d)
 
+    print("All done!")
+
     print(df)
+
+    if input("Would you like to save this data to a csv file?  ( enter y or n )" ) == 'y':
+        df.to_csv(input("Please enter filename"))
+
     
 def print_all_volumes():
     for i in range(3,8):
@@ -52,4 +67,8 @@ def print_one_volume(number):
 # The function below is a primitive spellchecker, it currently overextends to correct 
 # punctuation which should be an easy fix but also isn't the main goal right now
 
-review_vol(input("Please input number of report to review : "))
+
+if len(sys.argv) > 1:
+    review_vol(sys.argv[1])
+else:
+    review_vol(input("Please input number of report to review : "))
