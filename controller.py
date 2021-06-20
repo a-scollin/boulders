@@ -10,6 +10,7 @@ import json
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
 
+# This is the main entry point function for the project, it takes a number as an argument and will run a complete boulder data extraction over whatever volume is specified
 def review_vol(number):
 
     print("Reviewing volume : " + str(number))
@@ -18,6 +19,9 @@ def review_vol(number):
     word_data, word_string = SPL.get_spellchecked_volume(number)
        
        
+    # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
+    # consideration for the later volumes where they change the labeling standarads 
+
     matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",word_string)
 
     numbers = []
@@ -29,6 +33,8 @@ def review_vol(number):
     rocktypes = []
 
     print("Running NLP...")
+
+    # Ie for boulder paragraph in report..
 
     for match in matches:
         if len(match[1]) > 5:
@@ -53,6 +59,8 @@ def review_vol(number):
         df.to_csv(input("Please enter filename"))
 
     
+# Basic functions I wrote for testing the OCR .. 
+
 def print_all_volumes():
     for i in range(3,8):
         images = convert_from_path("./bouldercopies/" + str(i) + "_Report.pdf", 500)    
@@ -63,9 +71,6 @@ def print_one_volume(number):
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)    
     for image in images:
         OCR.print_from_image(image)
-
-# The function below is a primitive spellchecker, it currently overextends to correct 
-# punctuation which should be an easy fix but also isn't the main goal right now
 
 
 if len(sys.argv) > 1:

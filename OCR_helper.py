@@ -27,29 +27,19 @@ def print_from_image(image):
 
     print(teswords)
 
+# This is the preprocessing done before OCRing any image, makes the data alot more uniform and with less artifacts. 
+
 def OCR_pre_process_image(image):
     
     open_cv_image = np.array(image.convert('RGB')) 
     grayscaled = cv2.cvtColor(open_cv_image,cv2.COLOR_BGR2GRAY)
 
-    # No threshold preprocessing should be needed for the first report as it's all evenly scanned and is already black and white.
-
-    # th = cv2.adaptiveThreshold(grayscaled, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 115, 1)
-    # cv2.imwrite('./preprocessing/grayscaled.jpg', grayscaled)
-    # cv2.imwrite('./preprocessing/adaptive_threshold_processed.jpg',th)
-   
 
     clean = cv2.fastNlMeansDenoising(grayscaled, h=50)
     kernel = np.ones((2,2),np.uint8)
     erosion = cv2.erode(clean,kernel,iterations = 1)
     
-    # change values for thinning and denoising above for different volumes
-    
-    # cv2.imshow("original",grayscaled)
-    # cv2.imshow("denoised",clean)
-    # cv2.imshow("denoised + thinned",erosion)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+  
 
     return Image.fromarray(erosion)
    

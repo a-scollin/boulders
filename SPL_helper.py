@@ -5,6 +5,8 @@ from spellchecker import SpellChecker
 import pandas as pd
 import string
 
+# This function returns the data frame and word string of the OCR'ed volume number that is passed to it also corrects general mispellings 
+
 def get_spellchecked_volume(number):
 
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)
@@ -43,7 +45,7 @@ def get_spellchecked_volume(number):
 
     return word_data, word_string
     
-
+# This function takes an array of words and returns the suggested corrections that those words need.
 
 def attempt_spellcheck_on_volume(words):
              

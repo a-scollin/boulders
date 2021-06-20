@@ -9,15 +9,13 @@ from flair.tokenization import SegtokSentenceSplitter
 # load the NER tagger
 tagger = MultiTagger.load(['pos','ner'])
 
+
+# This function will extract information about singular boulder paragraphs (ie. a numbered paragraph that refers to a single boulder), returns the attributes found within the paragraph
 def find_boulder_from_numbered_regex(match):
 
     number = match[0] 
         
     paragraph = match[1]  
-
-
-    print(match)
-    
 
     # initialize sentence splitter
     splitter = SegtokSentenceSplitter()
@@ -51,6 +49,8 @@ def find_boulder_from_numbered_regex(match):
     return number, location, size, rocktype
 
 
+# This function analyses a sentence to extract size information relating to height and width 
+
 def find_size(flair_sentence,sentence):
     
     size = re.search("[0-9]+ (X|x) [0-9]+ (X|x) [0-9]+",sentence)
@@ -62,6 +62,8 @@ def find_size(flair_sentence,sentence):
     else: 
         
         return size
+
+# This function analyses a sentence to extract the rock type mentioned 
 
 def find_rocktype(flair_sentence, sentence):
 
@@ -84,6 +86,7 @@ def find_rocktype(flair_sentence, sentence):
                 return word
 
 
+# This function analyses a sentence to extract the main location mentioned 
 
 def find_location(flair_sentence,sentence):    
     location = None
