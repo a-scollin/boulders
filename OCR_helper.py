@@ -36,7 +36,7 @@ def OCR_pre_process_image(image):
 
 
     clean = cv2.fastNlMeansDenoising(grayscaled, h=50)
-    kernel = np.ones((2,2),np.uint8)
+    kernel = np.ones((1,1),np.uint8)
     erosion = cv2.erode(clean,kernel,iterations = 1)
     
   

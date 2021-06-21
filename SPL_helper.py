@@ -63,14 +63,16 @@ def attempt_spellcheck_on_volume(words):
                 if char.isalpha():
                     safeword += char
             if len(safeword):
-                safewords.append(safeword)            
+                safewords.append(str(safeword))            
 
 
     spell.word_frequency.load_words(safewords)
 
     # Problematic word :P
     spell.word_frequency.remove_words(['geiss'])
-
+        
+    # Problem with analysing reports with alot of photos, needs more preprocessing ! 
+    print(words)
 
     # find those words that may be misspelled
     misspelled = spell.unknown(words)
