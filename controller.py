@@ -7,6 +7,7 @@ import sys
 import re
 import NLP_helper
 import json
+import flag
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
 
@@ -55,10 +56,57 @@ def review_vol(number):
 
     print(df)
 
-    if input("Would you like to save this data to a csv file?  ( enter y or n )" ) == 'y':
+    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
         df.to_csv(input("Please enter filename"))
+        
 
+def print_vol(number):
+
+    print("Reviewing volume : " + str(number))
+    print("Running OCR and Spellchecker...")
+
+    word_data, word_string = SPL.get_spellchecked_volume(number)
+       
+       
+    # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
+    # consideration for the later volumes where they change the labeling standarads 
+
+    matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",word_string)
+
+    numbers = []
+
+    locations = []
+
+    sizes = []
+ 
+    rocktypes = []
+
+    print("Running NLP...")
+
+    # Ie for boulder paragraph in report..
+
+    for match in matches:
+        get_index_range_of_words(word_data,match.split(' '))
+        if len(match[1]) > 5:
+
+
+            number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
+            
+            numbers.append(number)
+            locations.append(location)
+            sizes.append(size)
+            rocktypes.append(rocktype)
+
+    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes}
     
+    df = pd.DataFrame(data=d)
+
+    return word_data, df
+    
+
+def get_index_range_of_words(df, words):
+    print("Breaktime")
+
 # Basic functions I wrote for testing the OCR .. 
 
 def print_all_volumes():
