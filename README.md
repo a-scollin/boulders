@@ -29,7 +29,7 @@ Started applying NLP techniques and added preprocessing and more regex
 + I had a few ideas about how to retrieve more accurate size, location and rocktype data as well:
 
 Size
-===
+=
 After looking at the records more I notice that the sizes are usually mentioned either in the first sentence or in a sentence of their own, this means I can just look for key words like height, length, width or breadth and flag the sentence to be considered for a special size analysis within the find_size function. This should be simple enough to do from the way I've laid out each function and class. 
 
 20/06
@@ -37,7 +37,7 @@ After looking at the records more I notice that the sizes are usually mentioned 
 I've added more to find_size so that it now will return the size for sentences that mention length and breadth which works in quite a few cases, also implemented a "span" variable that helps when looking at ambiguous or old timey speech, basically it creates a window around the mention of breadth length or height and looks for a p-o-s CD tag indicating a number, if the tag that it finds is already used it won't use it straight away rather only until its searched 8 words behind and in front of the mention. This works really well however I'll need to add a few more words to recognise such as "width", "high" and a few others.
 
 Location
-===
+=
 Although I've improved the accuracy of the location selection from the named entity recognition, some locations are far too broad.. for example they just describe the area of one of the boulders as Ayrshire which is massive. To remedy this I was thinking of doing the same thing for compass directions as above, where I would flag up sentences mentioning NW N .viz and such. This is a simple solution and hopefully should be easy to implement, however there is another challenge with contextual locations, 3/13 boulders mentioned in the 3rd report have locations referenced from other paragaphs, ie they mention "along the same path" or "this place" which is quite hard to determine, I think these will have to be self validated in the end unless I get a really good idea. 
 
 20/06
@@ -45,7 +45,15 @@ Although I've improved the accuracy of the location selection from the named ent
 I've looked into the location tagging more and there isn't really an elagant solution to get accurate locations outside of the cases where we would have compass directions and units of measurement. I've looked over the reports and the county should be simple enough to pull out as it's a placename that is in uppercase lettering however when talking about more specific areas it might be benfificial to just make a nice piece of verification software that would have the original text snippet and the general area meaning I could then just go through to manually do it. I'm currently just trying to get a simple python package that would let me do this as Pygame isn't working on my machine atm :/
 
 Rocktype
-===
+=
 The hardest part with getting accurate rock types is when multiple boulders or landscapes are mentioned in the same sentence, usually choosing the first mentioned rock type will get the boulder in questions rock type however this isn't always the case, especially when talking about a boulder on some clay terrain where the 1800's way of speaking even confuses me. I was thinking of making a rating system based on word frequencies in which - down the line - after multiple volumes have been scanned, the script from each can be filtered by rock type and word apperences (frequencies) to get the most common boulder types, then any collisions in rating can just be manually decided.    
 
 These ideas won't take too long to implement but they will take a while to perfect, and as these are the three main features of the boulder they are very important to classify accurately. 
+
+
+Verification and supervised training - 21/06
+===
+
+Going to work on making a corpus of training data for the named entity recognition that will accuratley label boulders mentioned in the same body of text. To do this I will first make a complete and accurate database of the 3rd and 4th reports by manually verifiying the software I've already written. I will make a UI that displays the pdf section from which the text was read in from and then I can either clear it ( ie tags and information are good ), alter it ( ie partially correct POS/information however some inaccuracys ) or reject it ( will go back at end to completly change it ). Since pygame isn't working well on my machine I'm going to try and do this using Kivy which I'm not as familiar with but it shouldn't be too hard as it's a simple UI component I'm thinking of...
+
+
