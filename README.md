@@ -51,3 +51,9 @@ The hardest part with getting accurate rock types is when multiple boulders or l
 These ideas won't take too long to implement but they will take a while to perfect, and as these are the three main features of the boulder they are very important to classify accurately. 
 
 
+Verification and supervised training - 21/06
+===
+
+Going to work on making a corpus of training data for the named entity recognition that will accuratley label boulders mentioned in the same body of text. To do this I will first make a complete and accurate database of the 3rd and 4th reports by manually verifiying the software I've already written. I will make a UI that displays the pdf section from which the text was read in from and then I can either clear it ( ie tags and information are good ), alter it ( ie partially correct POS/information however some inaccuracys ) or reject it ( will go back at end to completly change it ). Since pygame isn't working well on my machine I'm going to try and do this using Kivy which I'm not as familiar with but it shouldn't be too hard as it's a simple UI component I'm thinking of...
+
+
