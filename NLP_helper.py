@@ -36,6 +36,9 @@ def find_boulder_from_numbered_regex(match):
 
         if location is None:
             location = find_location(flair_sentence,flair_sentence.to_original_text())
+            if location:
+                location = (location,get_position_in_match(match[1],location))
+
 
         if size is None:
             size = find_size(flair_sentence,flair_sentence.to_original_text())
@@ -47,6 +50,7 @@ def find_boulder_from_numbered_regex(match):
             break
 
     return number, location, size, rocktype
+
 
 
 # This function analyses a sentence to extract size information relating to height and width 

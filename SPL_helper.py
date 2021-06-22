@@ -1,3 +1,4 @@
+
 import json
 from pdf2image import convert_from_path
 import OCR_helper as OCR
@@ -115,16 +116,11 @@ def attempt_spellcheck_on_volume(words):
     # Problem with analysing reports with alot of photos, needs more preprocessing ! 
     # print(words)
 
-    words = [str(word) for word in words]
+    # Found bug in -nan words.. recognised as NaN which messed up the spellchecker.. 
 
-    for word in words:
-        print(word)
-        for char in word:
-            if(char.isnumeric()):
-                print("number")
-                
-            
-
+    for i in range(0,len(words)):
+        if words[i] != words[i]:
+            words[i] = "nan"
 
 
     # find those words that may be misspelled

@@ -9,6 +9,7 @@ import NLP_helper
 import json
 import numpy as np
 import flag
+import pickle
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
 
@@ -20,14 +21,29 @@ def review_vol(number):
     if number == "3" or number == "4":
         return print_vol(number)
         
-
     print("Reviewing volume : " + str(number))
     print("Running OCR and Spellchecker...")
 
-
     word_data, word_string = SPL.get_spellchecked_volume(number)
        
-    
+    with open('word_data.pickle', 'wb') as f:
+        pickle.dump(word_data, f)
+
+    with open('word_string.pickle', 'wb') as f:
+        pickle.dump(word_string, f)
+
+    df = get_boulders(word_data, word_string)
+
+    print("All done!")
+
+    print(df)
+
+
+
+    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
+        df.to_csv(input("Please enter filename"))
+
+def get_boulders(word_data, word_string):
     # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
     # consideration for the later volumes where they change the labeling standarads 
 
@@ -48,7 +64,6 @@ def review_vol(number):
     for match in matches:
         if len(match[1]) > 5:
 
-
             number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
             
             numbers.append(number)
@@ -58,15 +73,9 @@ def review_vol(number):
 
     d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes}
     
-    df = pd.DataFrame(data=d)
+    return pd.DataFrame(data=d)
 
-    print("All done!")
 
-    print(df)
-
-    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
-        df.to_csv(input("Please enter filename"))
-        
 
 def print_vol(number):
 
@@ -128,7 +137,20 @@ def print_one_volume(number):
         OCR.print_from_image(image)
 
 
-if len(sys.argv) > 1:
+if len(sys.argv) == 1:
+
     review_vol(sys.argv[1])
+
+elif len(sys.argv) == 2:
+    
+    with open(sys.argv[1], 'rb') as f:
+        word_data = pickle.load(f)
+    
+    with open(sys.argv[2], 'rb') as f:
+        word_string = pickle.load(f)
+    
+    get_boulders(word_data,word_string)
+
 else:
+
     review_vol(input("Please input number of report to review : "))
