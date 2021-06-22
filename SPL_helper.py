@@ -33,10 +33,10 @@ def get_spellchecked_volume(number):
         for df in word_data:
             df[0]["text"] = df[0]["text"].replace([word_correction[0]],word_correction[1])
           
-          
     word_string = ""
 
     for df in word_data:
+        df[0]["text"] = df[0]["text"].replace([float('nan')],"nan")
         for index in df[0].index:
             word = df[0][df[0].index == index]["text"]
             word_string += word.array[0] + " "

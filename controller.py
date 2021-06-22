@@ -73,7 +73,8 @@ def get_boulders(word_data, word_string):
 
     d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes}
     
-    return pd.DataFrame(data=d)
+    print(pd.DataFrame(data=d))
+    print(word_data)
 
 
 
@@ -137,11 +138,11 @@ def print_one_volume(number):
         OCR.print_from_image(image)
 
 
-if len(sys.argv) == 1:
+if len(sys.argv) == 2:
 
     review_vol(sys.argv[1])
 
-elif len(sys.argv) == 2:
+elif len(sys.argv) == 3:
     
     with open(sys.argv[1], 'rb') as f:
         word_data = pickle.load(f)

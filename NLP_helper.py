@@ -29,28 +29,33 @@ def find_boulder_from_numbered_regex(match):
 
     rocktype = None
 
+    sentence_length = 0
+
     for flair_sentence in sentences:
         
         # predict NER and POS tags
         tagger.predict(flair_sentence)
 
         if location is None:
-            location = find_location(flair_sentence,flair_sentence.to_original_text())
+            loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
             if location:
-                location = (location,get_position_in_match(match[1],location))
-
-
+                loc_pos = (loc_pos[0]+sentence_length,loc_pos[1]+sentence_length)
+            
         if size is None:
-            size = find_size(flair_sentence,flair_sentence.to_original_text())
-        
+            siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
+            if size:
+                siz_pos = (siz_pos[0]+sentence_length,siz_pos[1]+sentence_length)
         if rocktype is None:
-            rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
-    
+            rt_pos, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
+            if rocktype:
+                rt_pos = (rt_pos[0]+sentence_length,rt_pos[1]+sentence_length)
         if size and location and rocktype:
             break
 
-    return number, location, size, rocktype
+        sentence_length += len(flair_sentence.to_original_text())
 
+
+    return number, location, size, rocktype
 
 
 # This function analyses a sentence to extract size information relating to height and width 
@@ -62,7 +67,9 @@ def find_size(flair_sentence,sentence):
     # hopefully will just be a simple l x b x h
     if size:
     
-        return size.group(0)
+        index = sentence.find(size.group(0))
+
+        return (index,index+len(size.group(0))),size.group(0) 
 
     else: 
     # If not, then check for length and breadth keywords.. not checking specifically for height because height is mentioned alot when desribing boulder locality
@@ -225,9 +232,9 @@ def find_size(flair_sentence,sentence):
                                             span_index = j
                                             span_counter = 1 
                                     
-            return "Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
+            return (0,len(sentence)-1),"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
         
-        return None
+        return None, None
                 
 
                     
@@ -254,8 +261,9 @@ def find_rocktype(flair_sentence, sentence):
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in sentence.split(" "):
             if word.casefold() in rocktypes:
-                return word
+                return (sentence.casefold().find(word.casefold()),len(word)), word
 
+    return None, None
 
 # This function analyses a sentence to extract the main location mentioned 
 
@@ -264,8 +272,6 @@ def find_location(flair_sentence,sentence):
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
         for label in entity["labels"]:
             if "LOC" in label.value:
-                location += entity["text"] + " "
-
-    return location
-    
+                return (entity["start_pos"],entity["end_pos"]), entity["text"]
+    return None, None
  
