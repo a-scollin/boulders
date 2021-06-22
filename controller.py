@@ -7,6 +7,7 @@ import sys
 import re
 import NLP_helper
 import json
+import numpy as np
 import flag
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
@@ -14,12 +15,19 @@ from pdf2image import convert_from_path
 # This is the main entry point function for the project, it takes a number as an argument and will run a complete boulder data extraction over whatever volume is specified
 def review_vol(number):
 
+    patch = False
+
+    if number == "3" or number == "4":
+        return print_vol(number)
+        
+
     print("Reviewing volume : " + str(number))
     print("Running OCR and Spellchecker...")
 
+
     word_data, word_string = SPL.get_spellchecked_volume(number)
        
-       
+    
     # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
     # consideration for the later volumes where they change the labeling standarads 
 
@@ -65,8 +73,7 @@ def print_vol(number):
     print("Reviewing volume : " + str(number))
     print("Running OCR and Spellchecker...")
 
-    word_data, word_string = SPL.get_spellchecked_volume(number)
-       
+    word_data, word_string = SPL.get_spellchecked_volume_for_printing(number)
        
     # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
     # consideration for the later volumes where they change the labeling standarads 
@@ -86,12 +93,10 @@ def print_vol(number):
     # Ie for boulder paragraph in report..
 
     for match in matches:
-        get_index_range_of_words(word_data,match.split(' '))
+        
         if len(match[1]) > 5:
 
-
             number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
-            
             numbers.append(number)
             locations.append(location)
             sizes.append(size)
@@ -101,7 +106,9 @@ def print_vol(number):
     
     df = pd.DataFrame(data=d)
 
-    return word_data, df
+    print(df)
+
+    return df
     
 
 def get_index_range_of_words(df, words):

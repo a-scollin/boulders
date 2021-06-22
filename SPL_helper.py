@@ -4,10 +4,51 @@ import OCR_helper as OCR
 from spellchecker import SpellChecker
 import pandas as pd
 import string
-
+import numpy as np
+import cv2
+from PIL import Image
+import math
 # This function returns the data frame and word string of the OCR'ed volume number that is passed to it also corrects general mispellings 
 
 def get_spellchecked_volume(number):
+
+    images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)
+    unchecked_words = []    
+    word_data = []
+
+    for image in images:
+        df = OCR.read_image_to_df(image)
+        for word in df["text"]:
+            unchecked_words.append(word)
+             
+        word_data.append((df,image))
+
+    corrections = attempt_spellcheck_on_volume(unchecked_words)
+
+    for word_correction in corrections:
+        if word_correction[0] == 'x':
+            continue 
+
+        for df in word_data:
+            df[0]["text"] = df[0]["text"].replace([word_correction[0]],word_correction[1])
+          
+          
+    word_string = ""
+
+    for df in word_data:
+        for index in df[0].index:
+            word = df[0][df[0].index == index]["text"]
+            word_string += word.array[0] + " "
+            
+    with open('report_text.txt', 'w') as f:
+        f.write(word_string + "\nCorrections made :\n" + str(corrections))
+    
+
+    return word_data, word_string
+    
+# This function takes an array of words and returns the suggested corrections that those words need.
+
+def get_spellchecked_volume_for_printing(number):
 
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)
     unchecked_words = []    
@@ -72,7 +113,19 @@ def attempt_spellcheck_on_volume(words):
     spell.word_frequency.remove_words(['geiss'])
         
     # Problem with analysing reports with alot of photos, needs more preprocessing ! 
-    print(words)
+    # print(words)
+
+    words = [str(word) for word in words]
+
+    for word in words:
+        print(word)
+        for char in word:
+            if(char.isnumeric()):
+                print("number")
+                
+            
+
+
 
     # find those words that may be misspelled
     misspelled = spell.unknown(words)

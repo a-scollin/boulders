@@ -11,3 +11,8 @@ regex ^^  = ([\d]+\. )(.*?)(?=([\d]+\.)|($))
 
 12 x 8 x 8 feet
 
+
+
+{'text': 'Washington went to New York .', 
+'labels': [], 
+'entities': [{'text': 'Washington', 'start_pos': 0, 'end_pos': 10, 'type': 'PER', 'confidence': 0.999004065990448}, {'text': 'New York', 'start_pos': 19, 'end_pos': 27, 'type': 'LOC', 'confidence': 0.9995943009853363}]}
