@@ -1,17 +1,20 @@
-from os import name
-import OCR_helper as OCR
-from PIL import Image
-import SPL_helper as SPL
-import pandas as pd
-import sys
-import re
-import NLP_helper
 import json
-import numpy as np
-import flag
 import pickle
+import re
+import sys
+from os import name
+
+import numpy as np
+from numpy.core.fromnumeric import size
+import pandas as pd
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
+from PIL import Image
+
+import NLP_helper
+import OCR_helper as OCR
+import SPL_helper as SPL
+
 
 # This is the main entry point function for the project, it takes a number as an argument and will run a complete boulder data extraction over whatever volume is specified
 def review_vol(number):
@@ -36,18 +39,50 @@ def review_vol(number):
 
     print("All done!")
 
+    pd.set_option("display.max_rows", None, "display.max_columns", None)
+
+
     print(df)
-
-
 
     if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
         df.to_csv(input("Please enter filename"))
+
 
 def get_boulders(word_data, word_string):
     # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
     # consideration for the later volumes where they change the labeling standarads 
 
-    matches = re.findall("([\d]+\. )(.*?)(?=([\d]+\.)|($))",word_string)
+    # start = False
+
+    # matches = {}
+
+    # title = None
+    # paragraph = None
+
+    # df_indexes = []
+
+    # for i in range(0,len(word_data)):
+        
+    #     if not start:
+    #         df_indexes.append(i)
+        
+    #     for word in word_data[i][0].text:
+    #         if not start and word.isupper() and len(word) > 5:
+    #             if title and paragraph:
+
+    #                 matches[title] = (paragraph, [word_data[j] for j in df_indexes])
+
+    #                 df_indexes = []
+                    
+    #             title = ""
+    #             paragraph = ""
+
+    #             start = True
+    #         if start and word.isupper():
+    #             title += word + " " 
+    #         if start and not word.isupper():
+    #             paragraph += word + " "
+    #             start = False
 
     numbers = []
 
@@ -57,24 +92,60 @@ def get_boulders(word_data, word_string):
  
     rocktypes = []
 
+    page_numbers = []
+
+    number = 0
+
+    page_number = int(input("What page number did the scan start at? : "))
+    
+    for i in range(0,len(word_data)):
+
+        for j, row in word_data[i][0].iterrows():
+            
+            if ("boulder" in row['text']):
+                
+                loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+
+                if location and rocktype:
+                    numbers.append(number)
+                    locations.append(location)
+                    sizes.append(size)
+                    rocktypes.append(rocktype)
+                    page_numbers.append(page_number)
+                    number += 1
+    
+        page_number += 1
+
+
+
+    # img_index = []
+    # loc_pos = []
+    # siz_pos = []
+    # rt_pos = []
+
     print("Running NLP...")
 
-    # Ie for boulder paragraph in report..
+    # # Ie for boulder paragraph in report..
 
-    for match in matches:
-        if len(match[1]) > 5:
+    # for match in matches:
+    #     if len(match[1]) > 5:
 
-            number, location, size, rocktype = NLP_helper.find_boulder_from_numbered_regex(match)
+    #         loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(match[1])
             
-            numbers.append(number)
-            locations.append(location)
-            sizes.append(size)
-            rocktypes.append(rocktype)
+    #         numbers.append(match[0])
+    #         locations.append(location)
+    #         sizes.append(size)
+    #         rocktypes.append(rocktype)
+            
 
-    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes}
+
+    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes, 'Page Number' : page_numbers }
     
-    print(pd.DataFrame(data=d))
-    print(word_data)
+    
+
+
+    return pd.DataFrame(data=d)
+    # print(word_data)
 
 
 
@@ -121,8 +192,6 @@ def print_vol(number):
     return df
     
 
-def get_index_range_of_words(df, words):
-    print("Breaktime")
 
 # Basic functions I wrote for testing the OCR .. 
 
@@ -150,7 +219,18 @@ elif len(sys.argv) == 3:
     with open(sys.argv[2], 'rb') as f:
         word_string = pickle.load(f)
     
-    get_boulders(word_data,word_string)
+    df = get_boulders(word_data,word_string)
+
+    print("All done!")
+
+    df.drop_duplicates(keep='first',inplace=True)
+
+    pd.set_option("display.max_rows", None, "display.max_columns", None)
+
+    print(df)
+
+    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
+        df.to_csv(input("Please enter filename"))
 
 else:
 

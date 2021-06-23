@@ -11,11 +11,11 @@ tagger = MultiTagger.load(['pos','ner'])
 
 
 # This function will extract information about singular boulder paragraphs (ie. a numbered paragraph that refers to a single boulder), returns the attributes found within the paragraph
-def find_boulder_from_numbered_regex(match):
-
-    number = match[0] 
-        
-    paragraph = match[1]  
+def find_boulder_from_paragraph(match):
+  
+    paragraph = ""
+    for word in match.text:
+        paragraph += word + " " 
 
     # initialize sentence splitter
     splitter = SegtokSentenceSplitter()
@@ -36,6 +36,8 @@ def find_boulder_from_numbered_regex(match):
         # predict NER and POS tags
         tagger.predict(flair_sentence)
 
+        # print(flair_sentence.to_tagged_string())
+
         if location is None:
             loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
             if location:
@@ -55,8 +57,7 @@ def find_boulder_from_numbered_regex(match):
         sentence_length += len(flair_sentence.to_original_text())
 
 
-    return number, location, size, rocktype
-
+    return loc_pos, siz_pos, rt_pos, location, size, rocktype
 
 # This function analyses a sentence to extract size information relating to height and width 
 
