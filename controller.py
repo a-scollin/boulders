@@ -50,6 +50,8 @@ def review_vol(number):
 
 
 def get_boulders(word_data, word_string):
+    
+    
     # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
     # consideration for the later volumes where they change the labeling standarads 
 
@@ -99,7 +101,16 @@ def get_boulders(word_data, word_string):
 
     page_number = int(input("What page number did the scan start at? : "))
     
+    start_page_number = int(page_number)
+    
+    WINDOW_NAME = "Page : "
+
+    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+    cv2.startWindowThread()
+
     for i in range(0,len(word_data)):
+
+        print("Analysing page : " + str(page_number))
 
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
@@ -117,7 +128,7 @@ def get_boulders(word_data, word_string):
                             # This word variable has the area for highlighting the passage in the pdf and verification app..
                             # word
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 3)
                         
                         char_count += len(word['text']) + 1
                 
@@ -125,11 +136,13 @@ def get_boulders(word_data, word_string):
                     char_count = 0
                     for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
-                        if char_count >= siz_pos[0] and char_count <= siz_pos[1]:
-                            # This word variable has the area for highlighting the passage in the pdf and verification app..
-                            # word
-                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+                        for dim in siz_pos:
+                            if (char_count >= siz_pos[dim][0] and char_count <= siz_pos[dim][1]):
+                                # This word variable has the area for highlighting the passage in the pdf and verification app..
+                                # word
+                                (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
                         
                         char_count += len(word['text']) + 1
 
@@ -140,8 +153,9 @@ def get_boulders(word_data, word_string):
                         if char_count >= rt_pos[0] and char_count <= rt_pos[1]:
                             # This word variable has the area for highlighting the passage in the pdf and verification app..
                             # word
+                            print("ROCKTYPE :" + str(word['text']))
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
                         
                         char_count += len(word['text']) + 1
 
@@ -154,10 +168,17 @@ def get_boulders(word_data, word_string):
                     rocktypes.append(rocktype)
                     page_numbers.append(page_number)
                     number += 1
-    
-        if page_number == 4:
-            cv2.imshow('img', img)
-            cv2.waitKey(0)   
+            
+           
+            
+
+        cv2.imshow("Page : " + str(page_number), img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        cv2.waitKey(1)
+
+        
+        
 
         page_number += 1
     # img_index = []

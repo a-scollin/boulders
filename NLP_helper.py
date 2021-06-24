@@ -45,7 +45,18 @@ def find_boulder_from_paragraph(match):
         if size is None:
             siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
             if size:
-                siz_pos = (siz_pos[0]+sentence_length,siz_pos[1]+sentence_length)
+                if "l" in siz_pos:
+                    siz_pos["l"] = (siz_pos["l"][0]+sentence_length,siz_pos["l"][1]+sentence_length)
+
+                if "b" in siz_pos:
+                    siz_pos["b"] = (siz_pos["b"][0]+sentence_length,siz_pos["b"][1]+sentence_length)
+
+                if "h" in siz_pos:
+                    siz_pos["h"] = (siz_pos["h"][0]+sentence_length,siz_pos["h"][1]+sentence_length)
+
+                if "x" in siz_pos:
+                    siz_pos["x"] = (siz_pos["x"][0]+sentence_length,siz_pos["x"][1]+sentence_length)
+
         if rocktype is None:
             rt_pos, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
             if rocktype:
@@ -62,14 +73,16 @@ def find_boulder_from_paragraph(match):
 
 def find_size(flair_sentence,sentence):
 
-    size = re.search("[0-9]+ (X|x) [0-9]+ (X|x) [0-9]+",sentence)
+    size = re.search("([0-9]+ (X|x) [0-9]+ (X|x) [0-9]+|[0-9]+ (X|x) [0-9]+)",sentence)
+
+
 
     # hopefully will just be a simple l x b x h
     if size:
     
         index = sentence.find(size.group(0))
 
-        return (index,index+len(size.group(0))),size.group(0) 
+        return {"x" : (index,index+len(size.group(0)))},size.group(0)
 
     else: 
     # If not, then check for length and breadth keywords.. not checking specifically for height because height is mentioned alot when desribing boulder locality
@@ -78,9 +91,14 @@ def find_size(flair_sentence,sentence):
             breadth, length, height = None, None, None
             breadth_index, length_index, height_index = None, None, None
 
+
             for i in range(0,len(spans)):
-        
+
+                
+            
                 if (spans[i].text.casefold() == "breadth".casefold() or spans[i].text.casefold() == "width".casefold()) and not breadth:
+                    
+                    
                     span_counter = 0    
                     j = i
                     k = i 
@@ -124,7 +142,9 @@ def find_size(flair_sentence,sentence):
                                         if (j == length_index or j == height_index) and breadth is None:
                                             span_index = j
                                             span_counter = 1 
-    
+
+                    
+                
                 
                 
                 if spans[i].text.casefold() == "length".casefold() and not length:
@@ -231,8 +251,29 @@ def find_size(flair_sentence,sentence):
                                             # print("span on")
                                             span_index = j
                                             span_counter = 1 
-                                    
-            return (0,len(sentence)-1),"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
+                
+
+
+            
+                 
+            l1, l2 = sentence.casefold().find("length"),sentence.casefold().find("length") + 6
+            b1, b2 = sentence.casefold().find("breadth"),sentence.casefold().find("breadth") + 7
+            if b1 == -1:
+                b1, b2 = sentence.casefold().find("width"),sentence.casefold().find("width") + 7
+            h1, h2 = sentence.casefold().find("height"),sentence.casefold().find("height") + 6
+
+            siz_pos = {}
+
+            if l1 != -1:
+                siz_pos["l"] = (l1,l2)
+
+            if b1 != -1:
+                siz_pos["b"] = (b1,b2)
+    
+            if h1 != -1:
+                siz_pos["h"] = (h1,h2)
+
+            return siz_pos,"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
         
         return None, None
                 
@@ -261,7 +302,8 @@ def find_rocktype(flair_sentence, sentence):
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in sentence.split(" "):
             if word.casefold() in rocktypes:
-                return (sentence.casefold().find(word.casefold()),len(word)), word
+                index = sentence.casefold().find(word.casefold())
+                return (index,index + len(word)), word
 
     return None, None
 
