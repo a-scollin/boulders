@@ -101,6 +101,8 @@ def get_boulders(word_data, word_string):
     
     for i in range(0,len(word_data)):
 
+        img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
+
         for j, row in word_data[i][0].iterrows():
             
             if ("boulder" in row['text']):
@@ -108,26 +110,42 @@ def get_boulders(word_data, word_string):
                 loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
                 if loc_pos:
-                    print(str(loc_pos))
-                    print("Location : " + str(location))
-                    img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
-                    
                     char_count = 0
                     for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                         if char_count >= loc_pos[0] and char_count <= loc_pos[1]:
                             # This word variable has the area for highlighting the passage in the pdf and verification app..
-                            print(word)
-                        
-                        
+                            # word
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
                             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
                         
                         char_count += len(word['text']) + 1
+                
+                if siz_pos:
+                    char_count = 0
+                    for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
+    
+                        if char_count >= siz_pos[0] and char_count <= siz_pos[1]:
+                            # This word variable has the area for highlighting the passage in the pdf and verification app..
+                            # word
+                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                        
+                        char_count += len(word['text']) + 1
 
-                    cv2.imshow('img', img)
-                    cv2.waitKey(0)                        
-                    raise("beans")
+                if rt_pos:
+                    char_count = 0
+                    for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
+    
+                        if char_count >= rt_pos[0] and char_count <= rt_pos[1]:
+                            # This word variable has the area for highlighting the passage in the pdf and verification app..
+                            # word
+                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                        
+                        char_count += len(word['text']) + 1
+
+        
 
                 if location and rocktype:
                     numbers.append(number)
@@ -137,10 +155,11 @@ def get_boulders(word_data, word_string):
                     page_numbers.append(page_number)
                     number += 1
     
+        if page_number == 4:
+            cv2.imshow('img', img)
+            cv2.waitKey(0)   
+
         page_number += 1
-
-
-
     # img_index = []
     # loc_pos = []
     # siz_pos = []
