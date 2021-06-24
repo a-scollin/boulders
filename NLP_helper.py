@@ -42,7 +42,6 @@ def find_boulder_from_paragraph(match):
             loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
             if location:
                 loc_pos = (loc_pos[0]+sentence_length,loc_pos[1]+sentence_length)
-            
         if size is None:
             siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
             if size:
