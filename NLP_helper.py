@@ -36,14 +36,19 @@ def find_boulder_from_paragraph(match):
         # predict NER and POS tags
         tagger.predict(flair_sentence)
 
-        # print(flair_sentence.to_tagged_string())
-
+        # Run find location to search the sentence for the location of the boulder. 
         if location is None:
             loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
+            # Get accurate position of the location in whole paragraph
             if location:
                 loc_pos = (loc_pos[0]+sentence_length,loc_pos[1]+sentence_length)
+
+
+        # Run find size to search the sentence for the size of the boulder
         if size is None:
             siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
+            
+            # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
             if size:
                 if "l" in siz_pos:
                     siz_pos["l"] = (siz_pos["l"][0]+sentence_length,siz_pos["l"][1]+sentence_length)
@@ -57,15 +62,17 @@ def find_boulder_from_paragraph(match):
                 if "x" in siz_pos:
                     siz_pos["x"] = (siz_pos["x"][0]+sentence_length,siz_pos["x"][1]+sentence_length)
 
+        # Run find rocktype to search the sentence for the rocktype of the boulder. 
         if rocktype is None:
             rt_pos, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
             if rocktype:
                 rt_pos = (rt_pos[0]+sentence_length,rt_pos[1]+sentence_length)
+        
+        # If we have all features stop searching 
         if size and location and rocktype:
             break
 
         sentence_length += len(flair_sentence.to_original_text())
-
 
     return loc_pos, siz_pos, rt_pos, location, size, rocktype
 
@@ -74,8 +81,6 @@ def find_boulder_from_paragraph(match):
 def find_size(flair_sentence,sentence):
 
     size = re.search("([0-9]+ (X|x) [0-9]+ (X|x) [0-9]+|[0-9]+ (X|x) [0-9]+)",sentence)
-
-
 
     # hopefully will just be a simple l x b x h
     if size:
@@ -91,13 +96,9 @@ def find_size(flair_sentence,sentence):
             breadth, length, height = None, None, None
             breadth_index, length_index, height_index = None, None, None
 
-
+            # Each word is searched in a span outwords and the first cardinal number found near the breadth or length or width.. that number is assigned to the breadth, length ..
             for i in range(0,len(spans)):
-
-                
-            
                 if (spans[i].text.casefold() == "breadth".casefold() or spans[i].text.casefold() == "width".casefold()) and not breadth:
-                    
                     
                     span_counter = 0    
                     j = i
@@ -142,9 +143,6 @@ def find_size(flair_sentence,sentence):
                                         if (j == length_index or j == height_index) and breadth is None:
                                             span_index = j
                                             span_counter = 1 
-
-                    
-                
                 
                 
                 if spans[i].text.casefold() == "length".casefold() and not length:
@@ -215,18 +213,15 @@ def find_size(flair_sentence,sentence):
                             k += 1 
                         for label in spans[j].labels:    
                             if "CD" in label.value:
-                                # print("CD!")
-                                # print(spans[j].text)
+                               
                                 if (j != breadth_index and j != length_index and spans[j].text.isnumeric()):
                                     height = spans[j].text
                                     breadth_index = j
                                 
-                                # print(breadth_index)
-                                # print(j)
-                                # print(height)
+                               
                                 if span_counter == 0:
                                     if (j == breadth_index or j == length_index) and height is None:
-                                        # print("span on")
+                                    
                                         span_index = j
                                         span_counter = 1 
 
@@ -235,26 +230,20 @@ def find_size(flair_sentence,sentence):
                             for label in spans[k].labels:
                                 if "CD" in label.value:
                                     if k != breadth_index and k != length_index and spans[k].text.isnumeric():
-                                        # print("K")
-                                        # print(span_counter)
-                                        # print(spans[k].text)
-
-                                        # print(i)
-                                        # print(j)
-                                        # print(k)
+                               
                                         
                                         height = spans[k].text 
                                         breadth_index = k  
 
                                     if span_counter == 0:
                                         if (j == breadth_index or j == length_index) and height is None:
-                                            # print("span on")
+                                            
                                             span_index = j
                                             span_counter = 1 
                 
 
 
-            
+            # TODO: Only uses the key words location right now needs to be more accurate showing the number it associates with the dimension aswell.. 
                  
             l1, l2 = sentence.casefold().find("length"),sentence.casefold().find("length") + 6
             b1, b2 = sentence.casefold().find("breadth"),sentence.casefold().find("breadth") + 7
@@ -276,13 +265,10 @@ def find_size(flair_sentence,sentence):
             return siz_pos,"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
         
         return None, None
-                
-
-                    
-
-        
 
 # This function analyses a sentence to extract the rock type mentioned 
+
+# TODO Needs secondary rocktype list to query over.. 
 
 def find_rocktype(flair_sentence, sentence):
 
@@ -308,6 +294,8 @@ def find_rocktype(flair_sentence, sentence):
     return None, None
 
 # This function analyses a sentence to extract the main location mentioned 
+
+# TODO needs more accurate location ! 
 
 def find_location(flair_sentence,sentence):    
     location = ""

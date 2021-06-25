@@ -1,3 +1,4 @@
+from functools import total_ordering
 import json
 import pickle
 import re
@@ -22,70 +23,46 @@ def review_vol(number):
 
     patch = False
 
+
+    # Reports 3 and 4 are a different structure being entries in a journal instead of their own books. 
     if number == "3" or number == "4":
         return print_vol(number)
         
     print("Reviewing volume : " + str(number))
     print("Running OCR and Spellchecker...")
 
+
+    # Getting the OCR'ed and Spellchecked volume back in a word_string and dataframe 
     word_data, word_string = SPL.get_spellchecked_volume(number)
        
+
+    # Saving this data so we don't need to OCR and Spellcheck every time
     with open('word_data.pickle', 'wb') as f:
         pickle.dump(word_data, f)
 
     with open('word_string.pickle', 'wb') as f:
         pickle.dump(word_string, f)
 
+    
+    # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
     df = get_boulders(word_data, word_string)
 
     print("All done!")
 
+    # Print whole dataframe
+
     pd.set_option("display.max_rows", None, "display.max_columns", None)
 
-
     print(df)
+
+    # Saving output
 
     if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
         df.to_csv(input("Please enter filename"))
 
 
+# TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
 def get_boulders(word_data, word_string):
-    
-    
-    # This regex splits paragraphs over "X. ..." meaning any paragraph mentioning a numbered boulder will be assessed, this will need extra 
-    # consideration for the later volumes where they change the labeling standarads 
-
-    # start = False
-
-    # matches = {}
-
-    # title = None
-    # paragraph = None
-
-    # df_indexes = []
-
-    # for i in range(0,len(word_data)):
-        
-    #     if not start:
-    #         df_indexes.append(i)
-        
-    #     for word in word_data[i][0].text:
-    #         if not start and word.isupper() and len(word) > 5:
-    #             if title and paragraph:
-
-    #                 matches[title] = (paragraph, [word_data[j] for j in df_indexes])
-
-    #                 df_indexes = []
-                    
-    #             title = ""
-    #             paragraph = ""
-
-    #             start = True
-    #         if start and word.isupper():
-    #             title += word + " " 
-    #         if start and not word.isupper():
-    #             paragraph += word + " "
-    #             start = False
 
     numbers = []
 
@@ -100,13 +77,18 @@ def get_boulders(word_data, word_string):
     number = 0
 
     page_number = int(input("What page number did the scan start at? : "))
+
+    print_page = True if input("Would you like to print each page? ( enter y or n ) : ") == 'y' else False 
     
-    start_page_number = int(page_number)
+    print("Running NLP...")
     
     WINDOW_NAME = "Page : "
 
-    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.startWindowThread()
+    if print_page:
+        cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+        cv2.startWindowThread()
+
+    # For each dataframe in word_data ie each page :
 
     for i in range(0,len(word_data)):
 
@@ -114,19 +96,25 @@ def get_boulders(word_data, word_string):
 
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
+        # For each word in the page : 
+
         for j, row in word_data[i][0].iterrows():
             
+            # if the word is a boulder related search term, look for the boulders features! 
+
             if ("boulder" in row['text']):
+
+                # Use paragraph where boulder search term was found for analysis
                 
                 loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+
+                # Highlight each word related to the boudlers features .. 
 
                 if loc_pos:
                     char_count = 0
                     for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                         if char_count >= loc_pos[0] and char_count <= loc_pos[1]:
-                            # This word variable has the area for highlighting the passage in the pdf and verification app..
-                            # word
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
                             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 3)
                         
@@ -136,11 +124,9 @@ def get_boulders(word_data, word_string):
                     char_count = 0
                     for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
-
+                        # Size_pos has multiple dimensions.. 
                         for dim in siz_pos:
-                            if (char_count >= siz_pos[dim][0] and char_count <= siz_pos[dim][1]):
-                                # This word variable has the area for highlighting the passage in the pdf and verification app..
-                                # word
+                            if (char_count >= siz_pos[dim][0] and char_count <= siz_pos[dim][1]): 
                                 (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
                                 cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
                         
@@ -151,16 +137,14 @@ def get_boulders(word_data, word_string):
                     for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                         if char_count >= rt_pos[0] and char_count <= rt_pos[1]:
-                            # This word variable has the area for highlighting the passage in the pdf and verification app..
-                            # word
-                            print("ROCKTYPE :" + str(word['text']))
+
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
                             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
                         
                         char_count += len(word['text']) + 1
 
         
-
+                # If we have a location and rocktype it qualifies as a boulder ! 
                 if location and rocktype:
                     numbers.append(number)
                     locations.append(location)
@@ -170,47 +154,26 @@ def get_boulders(word_data, word_string):
                     number += 1
             
            
-            
-
-        cv2.imshow("Page : " + str(page_number), img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        cv2.waitKey(1)
+        
+        if print_page:
+            cv2.imshow("Page : " + str(page_number), img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            cv2.waitKey(1)
 
         
         
 
         page_number += 1
-    # img_index = []
-    # loc_pos = []
-    # siz_pos = []
-    # rt_pos = []
-
-    print("Running NLP...")
-
-    # # Ie for boulder paragraph in report..
-
-    # for match in matches:
-    #     if len(match[1]) > 5:
-
-    #         loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(match[1])
-            
-    #         numbers.append(match[0])
-    #         locations.append(location)
-    #         sizes.append(size)
-    #         rocktypes.append(rocktype)
-            
-
+ 
 
     d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes, 'Page Number' : page_numbers }
     
+    return pd.DataFrame(data=d)
     
 
 
-    return pd.DataFrame(data=d)
-    # print(word_data)
-
-
+# For volumes 3 and 4 just to print the data and not fully analyse it.. 
 
 def print_vol(number):
 
@@ -270,6 +233,8 @@ def print_one_volume(number):
         OCR.print_from_image(image)
 
 
+# two optional arguments, either no arguments then you will be prompted for a number, enter a number, or enter the path to the word_data and word_string !  
+
 if len(sys.argv) == 2:
 
     review_vol(sys.argv[1])
@@ -285,6 +250,10 @@ elif len(sys.argv) == 3:
     df = get_boulders(word_data,word_string)
 
     print("All done!")
+
+    # TODO doesn't really work :/ 
+    # ||
+    # \/
 
     df.drop_duplicates(keep='first',inplace=True)
 
