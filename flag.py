@@ -14,59 +14,14 @@ from io import BytesIO
 
 
 
-Builder.load_string("""
-
-<MyScreenManager>:
-    ThirdScreen:
-        id: third_screen
-
-<ThirdScreen>:
-    name: '_third_screen_'
-    id: third_screen
-    BoxLayout:
-        orientation: "vertical"
-        id: third_screen_boxlayout
-        Label:
-            id: main_title
-            text: "Title"
-            size_hint: (1, 0.1)
-        BoxLayout:
-            id: image_box_layout
-            Image:
-                id: main_image
-                texture: root.beeld.texture
-        
-            Label:
-                id: Sentence
-                text: root.currenttext
-        BoxLayout:
-            id: button_boxlayout
-            orientation: "horizontal"
-            padding: 10
-            size_hint: (1, 0.15)
-            Button:
-                id: accept_button
-                text: "<"
-                size_hint: (0.33, 1)
-                on_press: root.go_back()
-            Button:
-                id: crop_button
-                text: "Undo"
-                size_hint: (0.33, 1)
-                on_press: root.undo()
-            Button:
-                id: cancel_button
-                text: ">"
-                size_hint: (0.33, 1) 
-                on_press: root.go_forward()
-""")
+Builder.load_file("./kvScenes/verf.kv")
 
 # on_press: root.manager.current = '_first_screen_'
 
-class MyScreenManager(ScreenManager):
-    pass
+class LandingScreen(Screen):
+    pass 
 
-class ThirdScreen(Screen):
+class VerfScreen(Screen):
     rect_box = ObjectProperty(None)
     t_x = NumericProperty(0.0)
     t_y = NumericProperty(0.0)
@@ -74,11 +29,13 @@ class ThirdScreen(Screen):
     array = [("Sentence this is a sentece.","./testingsnips/rep3test1.png"),("Sentence is this a sentece?","./testingsnips/rep3test2.png"),("Sentence this is sooonntance.","./testingsnips/rep3test3.png")]
     currenttext = StringProperty("Lets get started!")
     index = -1
+    beeld = kiImage() # only use this line in first code instance
+
     def __init__(self, **kwargs):
-        super(ThirdScreen, self).__init__(**kwargs)
+        super(VerfScreen, self).__init__(**kwargs)
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.beeld = kiImage() # only use this line in first code instance
+        
 
 
     def _keyboard_closed(self):
@@ -123,7 +80,11 @@ class ThirdScreen(Screen):
 
 class MyApp(App):
     def build(self):
-        return MyScreenManager()
+        
+        self.MyScreenManager = ScreenManager()
+        self.MyScreenManager.add_widget(LandingScreen(name='landing'))
+        self.MyScreenManager.add_widget(VerfScreen(name='verf'))
+        return self.MyScreenManager
 
 if __name__ == '__main__':
     MyApp().run()

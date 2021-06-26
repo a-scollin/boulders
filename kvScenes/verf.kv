@@ -1,0 +1,53 @@
+<LandingScreen>:
+    name: '_landing_screen_'
+    id: first_screen
+    BoxLayout:
+        orientation: "vertical"
+        id: first_screen_boxlayout
+        Label:
+            id: main_title
+            text: "First"
+            size_hint: (1, 0.1)
+        Button:
+            text: 'Start!'
+            on_press : root.manager.current = 'verf'
+
+<VerfScreen>:
+    name: '_verf_screen_'
+    id: verf_screen
+    BoxLayout:
+        orientation: "vertical"
+        id: verf_screen_boxlayout
+        Label:
+            id: main_title
+            text: "Title"
+            size_hint: (1, 0.1)
+        BoxLayout:
+            id: image_box_layout
+            Image:
+                id: main_image
+                texture: root.beeld.texture
+        
+            Label:
+                id: Sentence
+                text: root.currenttext
+        BoxLayout:
+            id: button_boxlayout
+            orientation: "horizontal"
+            padding: 10
+            size_hint: (1, 0.15)
+            Button:
+                id: accept_button
+                text: "<"
+                size_hint: (0.33, 1)
+                on_press: root.go_back()
+            Button:
+                id: crop_button
+                text: "Undo"
+                size_hint: (0.33, 1)
+                on_press: root.undo()
+            Button:
+                id: cancel_button
+                text: ">"
+                size_hint: (0.33, 1) 
+                on_press: root.go_forward()

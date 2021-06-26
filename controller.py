@@ -74,6 +74,16 @@ def get_boulders(word_data, word_string):
 
     page_numbers = []
 
+    full_boundings = []
+
+    loc_boundings = []
+    
+    siz_boundings = []
+
+    rt_boundings = []
+
+    par_nums = []
+
     number = 0
 
     page_number = int(input("What page number did the scan start at? : "))
@@ -96,6 +106,8 @@ def get_boulders(word_data, word_string):
 
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
+        
+
         # For each word in the page : 
 
         for j, row in word_data[i][0].iterrows():
@@ -104,53 +116,90 @@ def get_boulders(word_data, word_string):
 
             if ("boulder" in row['text']):
 
+                # for whole boulder phrase bounding box
+
+                least_x = 1000000
+                least_y = 1000000 
+                greatest_x_w = -1
+                greatest_y_h = -1
+
+
+                loc_bound = []
+                siz_bound = []
+                rt_bound = []
+             
                 # Use paragraph where boulder search term was found for analysis
                 
                 loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
                 # Highlight each word related to the boudlers features .. 
+                loc_char_count = 0
+                siz_char_count = 0
+                rt_char_count = 0 
 
-                if loc_pos:
-                    char_count = 0
-                    for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
-    
-                        if char_count >= loc_pos[0] and char_count <= loc_pos[1]:
-                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 3)
-                        
-                        char_count += len(word['text']) + 1
                 
-                if siz_pos:
-                    char_count = 0
-                    for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
+
+                for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
+                    if word['left'] < least_x:
+                            least_x = word['left']      
+
+                    if word['left'] + word['width'] > greatest_x_w:
+                            greatest_x_w = word['left'] + word['width']    
+                            
+                    if word['top'] < least_y:
+                        least_y = word['top']  
+
+                    if word['top'] + word['height'] > greatest_y_h:
+                        greatest_y_h = word['top'] + word['height']
+                    
+                    if loc_pos:
+                        if loc_char_count >= loc_pos[0] and loc_char_count <= loc_pos[1]:
+                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 5)
+
+                            loc_bound.append((x,y,x+w,y+h))
+                    
+
+                        loc_char_count += len(word['text']) + 1
+                    
+                    if siz_pos:
                         # Size_pos has multiple dimensions.. 
                         for dim in siz_pos:
-                            if (char_count >= siz_pos[dim][0] and char_count <= siz_pos[dim][1]): 
+                            if (siz_char_count >= siz_pos[dim][0] and siz_char_count <= siz_pos[dim][1]): 
                                 (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                        
-                        char_count += len(word['text']) + 1
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 5)
+                                siz_bound.append((x,y,x+w,y+h))
+                                
+                               
+                        siz_char_count += len(word['text']) + 1
 
-                if rt_pos:
-                    char_count = 0
-                    for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
-    
-                        if char_count >= rt_pos[0] and char_count <= rt_pos[1]:
-
+                    if rt_pos:
+                        if rt_char_count >= rt_pos[0] and rt_char_count <= rt_pos[1]:       
                             (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                
                             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
-                        
-                        char_count += len(word['text']) + 1
+                            rt_bound.append((x,y,x+w,y+h))
 
-        
+                        rt_char_count += len(word['text']) + 1
+
+
                 # If we have a location and rocktype it qualifies as a boulder ! 
                 if location and rocktype:
+
                     numbers.append(number)
                     locations.append(location)
                     sizes.append(size)
                     rocktypes.append(rocktype)
                     page_numbers.append(page_number)
+                    loc_boundings.append(loc_bound)
+                    siz_boundings.append(siz_bound)
+                    rt_boundings.append(rt_bound)
+                    full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
+                    par_nums.append(row['par_num'])
+                    cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
+                    print(least_x)
+                    print(least_y)
                     number += 1
             
            
@@ -161,14 +210,11 @@ def get_boulders(word_data, word_string):
             cv2.destroyAllWindows()
             cv2.waitKey(1)
 
-        
-        
-
         page_number += 1
  
 
-    d = {'Boulder Number': numbers, 'Boulder Location': locations, 'Boulder Size' : sizes, 'Boulder Rocktype' : rocktypes, 'Page Number' : page_numbers }
-    
+    d = {'Number': numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'FullBB' : full_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+     
     return pd.DataFrame(data=d)
     
 
