@@ -39,13 +39,9 @@ def review_vol(number):
     # Saving this data so we don't need to OCR and Spellcheck every time
     with open('word_data.pickle', 'wb') as f:
         pickle.dump(word_data, f)
-
-    with open('word_string.pickle', 'wb') as f:
-        pickle.dump(word_string, f)
-
     
     # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
-    df = get_boulders(word_data, word_string)
+    df = get_boulders(word_data)
 
     print("All done!")
 
@@ -62,7 +58,7 @@ def review_vol(number):
 
 
 # TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
-def get_boulders(word_data, word_string):
+def get_boulders(word_data):
 
     numbers = []
 
@@ -137,8 +133,6 @@ def get_boulders(word_data, word_string):
                 siz_char_count = 0
                 rt_char_count = 0 
 
-                
-
                 for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                     if word['left'] < least_x:
@@ -183,6 +177,9 @@ def get_boulders(word_data, word_string):
 
                         rt_char_count += len(word['text']) + 1
 
+                if not location and len(locations) and page_number == page_numbers[len(page_numbers) - 1]:
+                    location = locations[len(locations) - 1]
+                    loc_pos = loc_boundings[len(loc_boundings) - 1]
 
                 # If we have a location and rocktype it qualifies as a boulder ! 
                 if location and rocktype:
@@ -198,8 +195,6 @@ def get_boulders(word_data, word_string):
                     full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
                     par_nums.append(row['par_num'])
                     cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
-                    print(least_x)
-                    print(least_y)
                     number += 1
             
            
@@ -213,10 +208,13 @@ def get_boulders(word_data, word_string):
         page_number += 1
  
 
-    d = {'Number': numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'FullBB' : full_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'FullBB' : full_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
      
-    return pd.DataFrame(data=d)
-    
+    df = pd.DataFrame(data=d)
+
+    return df
+
+
 
 
 # For volumes 3 and 4 just to print the data and not fully analyse it.. 
@@ -287,25 +285,25 @@ if len(sys.argv) == 2:
 
 elif len(sys.argv) == 3:
     
-    with open(sys.argv[1], 'rb') as f:
+    if sys.argv[1] != '-l':
+        print("use -l to use preloaded data")
+        raise
+
+    with open(sys.argv[2], 'rb') as f:
         word_data = pickle.load(f)
     
-    with open(sys.argv[2], 'rb') as f:
-        word_string = pickle.load(f)
-    
-    df = get_boulders(word_data,word_string)
+   
+    df = get_boulders(word_data)
 
     print("All done!")
-
-    # TODO doesn't really work :/ 
-    # ||
-    # \/
-
-    df.drop_duplicates(keep='first',inplace=True)
 
     pd.set_option("display.max_rows", None, "display.max_columns", None)
 
     print(df)
+
+    if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
+        with open('boulder_data.pickle', 'wb') as f:
+            pickle.dump((word_data, df), f)
 
     if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
         df.to_csv(input("Please enter filename"))

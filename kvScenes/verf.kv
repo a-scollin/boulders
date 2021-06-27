@@ -1,16 +1,26 @@
 <LandingScreen>:
     name: '_landing_screen_'
     id: first_screen
+    
+    BoxLayout:
+        orientation: "vertical"
+        id: filemanager
+        Label: 
+            id: landing_title
+            size_hint: (1.0,0.2)
+            text: "Please choose your pickle file for verification :"
+        FileChooserIconView:
+            size_hint: (1.0,0.8)
+            id: filechooser
+            path: "./"
+            on_selection: app.path = self.selection and self.selection[0] or ''
     BoxLayout:
         orientation: "vertical"
         id: first_screen_boxlayout
-        Label:
-            id: main_title
-            text: "First"
-            size_hint: (1, 0.1)
+        size_hint: (1.0,0.1)
         Button:
             text: 'Start!'
-            on_press : root.manager.current = 'verf'
+            on_press : app.start_verf() 
 
 <VerfScreen>:
     name: '_verf_screen_'
@@ -20,16 +30,20 @@
         id: verf_screen_boxlayout
         Label:
             id: main_title
-            text: "Title"
+            text: "?"
             size_hint: (1, 0.1)
         BoxLayout:
             id: image_box_layout
+            orientation : "horizontal"
             Image:
                 id: main_image
                 texture: root.beeld.texture
         
             Label:
                 id: Sentence
+                text_size: self.width, None
+                size_hint: 1, None
+                height: self.texture_size[1]
                 text: root.currenttext
         BoxLayout:
             id: button_boxlayout
