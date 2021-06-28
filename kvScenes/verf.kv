@@ -21,6 +21,10 @@
         Button:
             text: 'Start!'
             on_press : app.start_verf() 
+        TextInput:
+            hint_text: 'Start Page:'
+            on_text : app.page_num = self.text
+
 
 <VerfScreen>:
     name: '_verf_screen_'

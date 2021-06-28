@@ -15,6 +15,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 
 
+
 from PIL import Image as Im
 from io import BytesIO
 import numpy as np
@@ -47,15 +48,24 @@ class VerfScreen(Screen):
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
-    def setup(self, path):
+    def setup(self, path, page_num):
         
-        if path.split('.').pop() != 'pickle':
+        if path.split('.').pop() != 'pickle' or not page_num.isnumeric():
 
             self.manager.current = 'landing'
 
+            buttonText = ""
+            
+            if path.split('.').pop() != 'pickle':
+                buttonText += 'Please select a pickle file returned from running controller.py!'
+
+            if not page_num.isnumeric():
+                buttonText += "\n\nPlease ensure you have supplied a number for the page start"
+
+
             # create content and add to the popup
-            content = Button(text='Please select a pickle file returned from running controller.py!')
-            popup = Popup(title='Wrong File Type!', content=content, auto_dismiss=False, size_hint=(0.8, 0.5))
+            content = Button(text=buttonText)
+            popup = Popup(title='Oops!', content=content, auto_dismiss=False, size_hint=(0.8, 0.5))
 
             # bind the on_press event of the button to the dismiss function
             content.bind(on_press=popup.dismiss)
@@ -70,8 +80,8 @@ class VerfScreen(Screen):
                 self.word_data, self.boulder_data = pickle.load(f)
 
             # create content and add to the popup
-            
-            start_page_number = int(input("What page number did the scan begin at ? : "))
+
+            start_page_number = int(page_num)
 
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
@@ -166,6 +176,7 @@ class MyScreenManager(ScreenManager):
 class MyApp(App):
 
     path = ""
+    page_num = 0
     def build(self):
         
         self.MyScreenManager = ScreenManager()
@@ -176,7 +187,8 @@ class MyApp(App):
     def start_verf(self):
         
         self.MyScreenManager.current = 'verf'
-        self.MyScreenManager.get_screen('verf').setup(self.path)
+        print(self.page_num)
+        self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num)
 
 
 if __name__ == '__main__':
