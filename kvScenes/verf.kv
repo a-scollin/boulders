@@ -42,6 +42,9 @@
                 id: boulder_title
                 text: root.boulder_number
             Label:
+                id: verf_title
+                text: root.verf
+            Label:
                 id: page_title
                 text: root.page_number
             Label:
@@ -78,10 +81,15 @@
                 size_hint: (0.33, 1)
                 on_press: root.go_back()
             Button:
-                id: crop_button
-                text: "Undo"
+                id: bad_button
+                text: "Bad"
                 size_hint: (0.33, 1)
-                on_press: root.undo()
+                on_press: root.bad_boulder(False)
+            Button:
+                id: good_button
+                text: "Good"
+                size_hint: (0.33, 1)
+                on_press: root.good_boulder(False)
             Button:
                 id: cancel_button
                 text: ">"

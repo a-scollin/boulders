@@ -1,3 +1,4 @@
+from types import TracebackType
 from kivy.lang import Builder
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -41,6 +42,7 @@ class VerfScreen(Screen):
     current_location = StringProperty("")
     current_rocktype = StringProperty("")
     current_size = StringProperty("")
+    verf = StringProperty("NOT VERIFIED")
 
     start_page_number = 0
     boulder_number = StringProperty("")
@@ -121,16 +123,20 @@ class VerfScreen(Screen):
                 for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
                     display_string += word['text'] + " "
                 
-                self.array.append((boulder, pageimg.crop(area),display_string))
+                self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED"))
 
         return True
     def _keyboard_closed(self):
         
-        print("beans")
+        return
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if keycode[1] == 'e':
+        if keycode[1] == 'r':
             self.go_forward()
+        if keycode[1] == 'w':
+            self.bad_boulder(True)
+        if keycode[1] == 'e':
+            self.good_boulder(True)
         elif keycode[1] == 'q':
             self.go_back()
         return True
@@ -145,6 +151,28 @@ class VerfScreen(Screen):
             self.index -= 1
         self.update()
 
+    def bad_boulder(self, move):
+        if self.index >= 0:
+            self.verf = "INCORRECT"
+            tmp = list(self.array[self.index])
+            tmp[3] = self.verf
+            self.array[self.index] = tuple(tmp)
+        if move:
+            self.index += 1
+
+        self.update()
+
+    def good_boulder(self,move):
+        if self.index >= 0:
+            self.verf = "CORRECT"
+            tmp = list(self.array[self.index])
+            tmp[3] = self.verf
+            self.array[self.index] = tuple(tmp)
+            
+        if move:
+            self.index += 1
+        self.update()
+
     def update(self):
         
         if self.index != -1:
@@ -156,16 +184,16 @@ class VerfScreen(Screen):
             im = CoreImage(BytesIO(data.read()), ext='png')
             self.currenttext = self.array[self.index][2]
             self.beeld.texture = im.texture
-            self.boulder_number = "Boulder Number : " + str(self.index + self.start_page_number)
+            self.boulder_number = "Boulder Number : " + str(self.index)
             self.page_number = "Page Number : " + str(self.array[self.index][0]['Page_Number'])
-            
             self.current_location = "Location : " + str(self.array[self.index][0]['Location'])
-            
             self.current_rocktype = "Rocktype : " + str(self.array[self.index][0]['Rocktype'])
-            
             self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
-
+            self.verf = self.array[self.index][3]
             
+            
+            
+
  
 
         return True
