@@ -5,7 +5,7 @@ from kivy.uix.widget import Widget
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
 from kivy.graphics import Point
-from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty, ColorProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 from kivy.core.image import Image as CoreImage
@@ -43,7 +43,7 @@ class VerfScreen(Screen):
     current_rocktype = StringProperty("")
     current_size = StringProperty("")
     verf = StringProperty("NOT VERIFIED")
-
+    verf_colour = ColorProperty('yellow')
     start_page_number = 0
     boulder_number = StringProperty("")
     rect_box = ObjectProperty(None)
@@ -190,12 +190,17 @@ class VerfScreen(Screen):
             self.current_rocktype = "Rocktype : " + str(self.array[self.index][0]['Rocktype'])
             self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
             self.verf = self.array[self.index][3]
-            
-            
-            
 
- 
+            if self.verf == "NOT VERIFIED":
+                self.verf_colour = "yellow"
 
+            if self.verf == "CORRECT":
+                self.verf_colour = "green"
+            
+            if self.verf == "INCORRECT":
+                self.verf_colour = "red"
+            
+    
         return True
 
     
