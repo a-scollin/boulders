@@ -18,12 +18,13 @@
         orientation: "vertical"
         id: first_screen_boxlayout
         size_hint: (1.0,0.1)
-        Button:
-            text: 'Start!'
-            on_press : app.start_verf() 
         TextInput:
             hint_text: 'Start Page:'
             on_text : app.page_num = self.text
+        Button:
+            text: 'Start!'
+            on_press : app.start_verf() 
+       
 
 
 <VerfScreen>:
@@ -32,23 +33,40 @@
     BoxLayout:
         orientation: "vertical"
         id: verf_screen_boxlayout
-        Label:
-            id: main_title
-            text: "?"
-            size_hint: (1, 0.1)
+        
+        BoxLayout:
+            orientation: "horizontal"
+            id: attributes_labels
+            size_hint: (1, 0.3)
+            Label:
+                id: boulder_title
+                text: root.boulder_number
+            Label:
+                id: page_title
+                text: root.page_number
+            Label:
+                id: location_title
+                text: root.current_location
+            Label:
+                id: rocktype_title
+                text: root.current_rocktype
+            Label:
+                id: size_title
+                text: root.current_size
+            
+               
+                
         BoxLayout:
             id: image_box_layout
             orientation : "horizontal"
             Image:
-                id: main_image
+                id: kk
                 texture: root.beeld.texture
-        
-            Label:
-                id: Sentence
-                text_size: self.width, None
-                size_hint: 1, None
-                height: self.texture_size[1]
+
+            TextInput:
+                id: verf_text
                 text: root.currenttext
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
         BoxLayout:
             id: button_boxlayout
             orientation: "horizontal"

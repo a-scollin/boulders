@@ -22,6 +22,7 @@ import numpy as np
 import pickle
 import cv2
 from PIL import Image, ImageColor, ImageDraw, ImageEnhance
+from numpy.lib.twodim_base import vander
 
 Builder.load_file("./kvScenes/verf.kv")
 
@@ -34,6 +35,15 @@ class LandingScreen(Screen):
     pass 
 
 class VerfScreen(Screen):
+
+    page_number = StringProperty("")
+
+    current_location = StringProperty("")
+    current_rocktype = StringProperty("")
+    current_size = StringProperty("")
+
+    start_page_number = 0
+    boulder_number = StringProperty("")
     rect_box = ObjectProperty(None)
     t_x = NumericProperty(0.0)
     t_y = NumericProperty(0.0)
@@ -50,7 +60,7 @@ class VerfScreen(Screen):
 
     def setup(self, path, page_num):
         
-        if path.split('.').pop() != 'pickle' or not page_num.isnumeric():
+        if path.split('.').pop() != 'pickle' or not str(page_num).isnumeric():
 
             self.manager.current = 'landing'
 
@@ -59,7 +69,8 @@ class VerfScreen(Screen):
             if path.split('.').pop() != 'pickle':
                 buttonText += 'Please select a pickle file returned from running controller.py!'
 
-            if not page_num.isnumeric():
+            print(page_num)
+            if not str(page_num).isnumeric():
                 buttonText += "\n\nPlease ensure you have supplied a number for the page start"
 
 
@@ -73,6 +84,8 @@ class VerfScreen(Screen):
             # open the popup
             popup.open()
 
+            return False
+
         else:
 
 
@@ -80,13 +93,15 @@ class VerfScreen(Screen):
                 self.word_data, self.boulder_data = pickle.load(f)
 
             # create content and add to the popup
+            self.start_page_number = int(page_num)
 
-            start_page_number = int(page_num)
+            
 
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
 
-                wd_index = boulder['Page_Number']-start_page_number
+                wd_index = boulder['Page_Number']-self.start_page_number
+
 
                 pageimg = self.word_data[wd_index][1]
                 
@@ -108,16 +123,15 @@ class VerfScreen(Screen):
                 
                 self.array.append((boulder, pageimg.crop(area),display_string))
 
+        return True
     def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
+        
+        print("beans")
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if keycode[1] == 'e':
-            print("Good")
             self.go_forward()
         elif keycode[1] == 'q':
-            print("Bad") 
             self.go_back()
         return True
     
@@ -142,8 +156,18 @@ class VerfScreen(Screen):
             im = CoreImage(BytesIO(data.read()), ext='png')
             self.currenttext = self.array[self.index][2]
             self.beeld.texture = im.texture
+            self.boulder_number = "Boulder Number : " + str(self.index + self.start_page_number)
+            self.page_number = "Page Number : " + str(self.array[self.index][0]['Page_Number'])
+            
+            self.current_location = "Location : " + str(self.array[self.index][0]['Location'])
+            
+            self.current_rocktype = "Rocktype : " + str(self.array[self.index][0]['Rocktype'])
+            
+            self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
 
-        
+            
+ 
+
         return True
 
     
@@ -175,7 +199,7 @@ class MyScreenManager(ScreenManager):
 
 class MyApp(App):
 
-    path = ""
+    path = "beans"
     page_num = 0
     def build(self):
         
@@ -186,9 +210,8 @@ class MyApp(App):
 
     def start_verf(self):
         
-        self.MyScreenManager.current = 'verf'
-        print(self.page_num)
-        self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num)
+        if self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num):
+            self.MyScreenManager.current = 'verf'
 
 
 if __name__ == '__main__':
