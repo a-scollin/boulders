@@ -2,11 +2,11 @@ breccia
 clay 
 conglomerate 
 ironstone 
-old red sandstone 
+sandstone 
 sand 
 sandstone 
 shale 
-silurian rock 
+silurian  
 turf 
 gneiss 
 quartzite 
@@ -15,7 +15,6 @@ schistose
 slate 
 basalt 
 granite 
-
 sienitic 
 trap 
 tuff 
@@ -24,21 +23,8 @@ porphyry
 whin 
 greenstone 
 knap
-
-Grey 
-dark 
-red
-blue 
- 
-
-
 detritus 
 heaps 
-gravel 
-mound 
-rocky knoll  
- 
-
 quartz 
 marcasite 
 pyrite 

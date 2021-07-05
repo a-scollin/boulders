@@ -38,6 +38,7 @@ def find_boulder_from_paragraph(match):
 
         # Run find location to search the sentence for the location of the boulder. 
         if location is None:
+            # TODO find_Location has all locations not dealt with properly... also redo all of the find from paragraph function for rating .. 
             loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
             # Get accurate position of the location in whole paragraph
             if location:
@@ -270,20 +271,18 @@ def find_size(flair_sentence,sentence):
 
 # TODO Needs secondary rocktype list to query over.. 
 
+rocktypes = []
+with open('./dictionaries/rocktypes.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            rocktypes.append(word)          
+
+
 def find_rocktype(flair_sentence, sentence):
-
-    rocktypes = [] 
-
-
-    with open('./dictionaries/rocktypes.txt', 'r') as f:
-        for line in f:
-            word = ""
-            for char in line:
-                if char.isalpha():
-                    word += char
-            if len(word):
-                rocktypes.append(word)           
-
 
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in sentence.split(" "):
@@ -298,10 +297,14 @@ def find_rocktype(flair_sentence, sentence):
 # TODO needs more accurate location ! 
 
 def find_location(flair_sentence,sentence):    
-    location = ""
+    location = []
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
         for label in entity["labels"]:
             if "LOC" in label.value:
-                return (entity["start_pos"],entity["end_pos"]), entity["text"]
-    return None, None
+                location.append((entity["start_pos"],entity["end_pos"]), entity["text"])
+    
+    if len(location):
+        return location
+    else:
+        return None, None
  

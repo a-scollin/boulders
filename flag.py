@@ -14,6 +14,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
 
 
 
@@ -42,7 +43,7 @@ class VerfScreen(Screen):
     current_location = StringProperty("")
     current_rocktype = StringProperty("")
     current_size = StringProperty("")
-    verf = StringProperty("NOT VERIFIED")
+    verf = StringProperty("")
     verf_colour = ColorProperty('yellow')
     start_page_number = 0
     boulder_number = StringProperty("")
@@ -51,7 +52,7 @@ class VerfScreen(Screen):
     t_y = NumericProperty(0.0)
     x1 = y1 = x2 = y2 = NumericProperty(0.0)
     array = []
-    currenttext = StringProperty("Lets get started!")
+    currenttext = StringProperty("Help ? \nKeyboard Bindings\n q = Go back\n w = Bad Boulder \n e = Good Boulder\n r = Go forward\np = Change Location\nGo forward to start verifying.")
     index = -1
     beeld = kiImage() # only use this line in first code instance
 
@@ -97,14 +98,11 @@ class VerfScreen(Screen):
             # create content and add to the popup
             self.start_page_number = int(page_num)
 
-            
-
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
 
                 wd_index = boulder['Page_Number']-self.start_page_number
-
-
+                
                 pageimg = self.word_data[wd_index][1]
                 
                 if len(boulder['LBB']):
@@ -125,6 +123,13 @@ class VerfScreen(Screen):
                 
                 self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED"))
 
+                theimage = Im.open("./testingsnips/boulder.jpg")
+                data = BytesIO()
+                theimage.save(data, format='png')            
+                data.seek(0) # yes you actually need this
+                im = CoreImage(BytesIO(data.read()), ext='png')
+                self.beeld.texture = im.texture
+
         return True
     def _keyboard_closed(self):
         
@@ -137,6 +142,8 @@ class VerfScreen(Screen):
             self.bad_boulder(True)
         if keycode[1] == 'e':
             self.good_boulder(True)
+        if keycode[1] == 'p':
+            self.update_location()
         elif keycode[1] == 'q':
             self.go_back()
         return True
@@ -145,6 +152,38 @@ class VerfScreen(Screen):
         if self.index < len(self.array) - 1:
             self.index += 1
         self.update()
+
+    def update_location(self):
+
+        
+        if not self.array[self.index][0]['Location']:
+            return     
+        else:
+
+            box = BoxLayout(orientation="vertical")
+            loca = TextInput(text=self.array[self.index][0]['Location'])
+            box.add_widget(loca)
+
+            sub_but = Button(text="Submit Changes")
+            dis_but = Button(text="Dismiss")
+
+            box.add_widget(sub_but)
+            box.add_widget(dis_but)
+
+            popup = Popup(title='Location', content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
+
+            location = loca.text
+            sub_but.bind(on_press = lambda location, popup: self.submit_location(location, popup))
+            dis_but.bind(on_press=popup.dismiss)            
+
+            # open the popup
+            popup.open()        
+
+    def submit_location(self,loc, popup):
+        
+
+        print(loc)
+        popup.dismiss()
 
     def go_back(self):
         if self.index > 0:
@@ -235,7 +274,7 @@ class MyApp(App):
     path = "beans"
     page_num = 0
     def build(self):
-        
+        self.title = "Boulder Verification App"
         self.MyScreenManager = ScreenManager()
         self.MyScreenManager.add_widget(LandingScreen(name='landing'))
         self.MyScreenManager.add_widget(VerfScreen(name='verf'))
