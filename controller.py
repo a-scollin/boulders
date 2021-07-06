@@ -7,6 +7,7 @@ from os import name
 
 import numpy as np
 from numpy.core.fromnumeric import size
+from numpy.lib.utils import byte_bounds
 import pandas as pd
 # Convert from path reutrns a list of PIL images making it very easy to use
 from pdf2image import convert_from_path
@@ -78,6 +79,8 @@ def get_boulders(word_data):
 
     rt_boundings = []
 
+    b_boundings = []
+
     par_nums = []
 
     number = 0
@@ -103,14 +106,25 @@ def get_boulders(word_data):
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
         
+        p_nums = []
+
 
         # For each word in the page : 
+
+
 
         for j, row in word_data[i][0].iterrows():
             
             # if the word is a boulder related search term, look for the boulders features! 
 
             if ("boulder" in row['text']):
+
+                # for confidence down the line
+                # p_nums.append(row["par_num"])
+
+                
+
+                # conf = 100 
 
                 # for whole boulder phrase bounding box
 
@@ -119,14 +133,21 @@ def get_boulders(word_data):
                 greatest_x_w = -1
                 greatest_y_h = -1
 
-
                 loc_bound = []
                 siz_bound = []
                 rt_bound = []
-             
+                
+                (x, y, w, h) = (row['left'], row['top'], row['width'], row['height'])
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 5)
+                
+                b_bound = (x,y,x+w,y+h)
+
+
                 # Use paragraph where boulder search term was found for analysis
                 
                 loc_pos, siz_pos, rt_pos, location, size, rocktype = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+
+                
 
                 # Highlight each word related to the boudlers features .. 
                 loc_char_count = 0
@@ -136,7 +157,7 @@ def get_boulders(word_data):
                 for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                     if word['left'] < least_x:
-                            least_x = word['left']      
+                            least_x = word['left']     
 
                     if word['left'] + word['width'] > greatest_x_w:
                             greatest_x_w = word['left'] + word['width']    
@@ -148,11 +169,12 @@ def get_boulders(word_data):
                         greatest_y_h = word['top'] + word['height']
                     
                     if loc_pos:
-                        if loc_char_count >= loc_pos[0] and loc_char_count <= loc_pos[1]:
-                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 5)
+                        for dim in loc_pos:
+                            if loc_char_count >= loc_pos[dim][0] and loc_char_count <= loc_pos[dim][1]:
+                                (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 5)
 
-                            loc_bound.append((x,y,x+w,y+h))
+                                loc_bound.append((x,y,x+w,y+h))
                     
 
                         loc_char_count += len(word['text']) + 1
@@ -169,11 +191,12 @@ def get_boulders(word_data):
                         siz_char_count += len(word['text']) + 1
 
                     if rt_pos:
-                        if rt_char_count >= rt_pos[0] and rt_char_count <= rt_pos[1]:       
-                            (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                                
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
-                            rt_bound.append((x,y,x+w,y+h))
+                        for dim in rt_pos:
+                            if rt_char_count >= rt_pos[dim][0] and rt_char_count <= rt_pos[dim][1]:       
+                                (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                    
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
+                                rt_bound.append((x,y,x+w,y+h))
 
                         rt_char_count += len(word['text']) + 1
 
@@ -183,6 +206,12 @@ def get_boulders(word_data):
 
                 # If we have a location and rocktype it qualifies as a boulder ! 
                 if location and rocktype:
+                    
+                    least_y -= 100
+                    least_x -= 100
+                    greatest_y_h += 100
+                    greatest_x_w += 100
+
 
                     numbers.append(number)
                     locations.append(location)
@@ -192,12 +221,14 @@ def get_boulders(word_data):
                     loc_boundings.append(loc_bound)
                     siz_boundings.append(siz_bound)
                     rt_boundings.append(rt_bound)
+                    b_boundings.append(b_bound)
                     full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
                     par_nums.append(row['par_num'])
                     cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
                     number += 1
             
-           
+        print(numbers) 
+        print(locations) 
         
         if print_page:
             cv2.imshow("Page : " + str(page_number), img)
@@ -208,7 +239,7 @@ def get_boulders(word_data):
         page_number += 1
  
 
-    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'FullBB' : full_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
      
     df = pd.DataFrame(data=d)
 

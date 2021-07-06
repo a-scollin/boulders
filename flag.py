@@ -101,9 +101,14 @@ class VerfScreen(Screen):
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
 
+                area = (area[0]-50,area[1]-50,area[2]+50,area[3]+50)
+
+
                 wd_index = boulder['Page_Number']-self.start_page_number
                 
                 pageimg = self.word_data[wd_index][1]
+
+                pageimg = self.highlight_area(pageimg, boulder['BBB'], 1.5, outline_color=ImageColor.getrgb('cyan'), outline_width=5)
                 
                 if len(boulder['LBB']):
                     for box in boulder['LBB']:

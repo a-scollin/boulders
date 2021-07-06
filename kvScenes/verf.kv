@@ -69,10 +69,12 @@
         BoxLayout:
             id: image_box_layout
             orientation : "horizontal"
-            Image:
-                id: kk
-                texture: root.beeld.texture
-
+            ScrollView:
+                Image:
+                    id: kk
+                    size_hint : (1, 1)
+                    texture: root.beeld.texture
+                    
             TextInput:
                 id: verf_text
                 text: root.currenttext

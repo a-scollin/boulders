@@ -32,3 +32,4 @@ mica
 felspar 
 hornblende 
 biotite 
+sienite

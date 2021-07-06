@@ -5,6 +5,7 @@ from flair.data import Sentence
 from flair.models import MultiTagger
 from flair.models import SequenceTagger
 from flair.tokenization import SegtokSentenceSplitter
+import string
 
 # load the NER tagger
 tagger = MultiTagger.load(['pos','ner'])
@@ -31,6 +32,8 @@ def find_boulder_from_paragraph(match):
 
     sentence_length = 0
 
+
+
     for flair_sentence in sentences:
         
         # predict NER and POS tags
@@ -39,12 +42,18 @@ def find_boulder_from_paragraph(match):
         # Run find location to search the sentence for the location of the boulder. 
         if location is None:
             # TODO find_Location has all locations not dealt with properly... also redo all of the find from paragraph function for rating .. 
-            loc_pos, location = find_location(flair_sentence,flair_sentence.to_original_text())
+            loc_dict, location = find_location(flair_sentence,match)
             # Get accurate position of the location in whole paragraph
-            if location:
-                loc_pos = (loc_pos[0]+sentence_length,loc_pos[1]+sentence_length)
+            
+            
 
-
+            if loc_dict:
+                for loc in loc_dict:
+                    tup = loc_dict[loc] 
+                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
+                    loc_dict[loc] = tup
+        
+         
         # Run find size to search the sentence for the size of the boulder
         if size is None:
             siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
@@ -65,17 +74,21 @@ def find_boulder_from_paragraph(match):
 
         # Run find rocktype to search the sentence for the rocktype of the boulder. 
         if rocktype is None:
-            rt_pos, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
-            if rocktype:
-                rt_pos = (rt_pos[0]+sentence_length,rt_pos[1]+sentence_length)
+            rt_dict, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
+            if rt_dict:
+                for rt in rt_dict:
+                    tup = rt_dict[rt]
+                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
+                    rt_dict[rt] = tup
+
         
-        # If we have all features stop searching 
-        if size and location and rocktype:
-            break
+        # # If we have all features stop searching 
+        # if size and location and rocktype:
+        #     break
 
         sentence_length += len(flair_sentence.to_original_text())
 
-    return loc_pos, siz_pos, rt_pos, location, size, rocktype
+    return loc_dict, siz_pos, rt_dict, location, size, rocktype
 
 # This function analyses a sentence to extract size information relating to height and width 
 
@@ -284,27 +297,62 @@ with open('./dictionaries/rocktypes.txt', 'r') as f:
 
 def find_rocktype(flair_sentence, sentence):
 
+    rt_dict = {}
+    rt = ""
+    first = True
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
-        for word in sentence.split(" "):
+        for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
             if word.casefold() in rocktypes:
+                print(word)
                 index = sentence.casefold().find(word.casefold())
-                return (index,index + len(word)), word
-
-    return None, None
+                print(index)
+                if first:
+                    rt = word
+                    first = False
+                if not(word in rt_dict):
+                    rt_dict[word] = (index,index + len(word))
+    if rt_dict:
+        return rt_dict, rt
+    else:
+        return None, None
 
 # This function analyses a sentence to extract the main location mentioned 
 
 # TODO needs more accurate location ! 
 
-def find_location(flair_sentence,sentence):    
-    location = []
+def find_location(flair_sentence,match):    
+    location = ''    
+    loc_dict = {}
+
+    # Manual override for first report as the text orientation is consistent
+    if True:
+        senlen = 0
+        for word in match.iterrows():
+            if word[1]['left'] < 900:
+                if not word[1]['text'].isupper():                    
+                    location = word[1]['text']
+                    loc_dict[word[1]["text"]] = (senlen,senlen+len(word[1]))
+            senlen += len(word[1]['text'])
+    
+    location = location.split(".—")[0]
+
+    first = True
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
         for label in entity["labels"]:
             if "LOC" in label.value:
-                location.append((entity["start_pos"],entity["end_pos"]), entity["text"])
-    
-    if len(location):
-        return location
+
+                if first:
+                    location += " - " + entity["text"]
+                    first = False
+
+                if not (entity["text"] in loc_dict):
+                    loc_dict[entity["text"]] = (entity["start_pos"],entity["end_pos"])
+
+    if loc_dict:
+        return loc_dict, location  
     else:
         return None, None
+
+
+        
  
