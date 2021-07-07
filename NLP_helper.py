@@ -30,6 +30,8 @@ def find_boulder_from_paragraph(match):
 
     rocktype = None
 
+    author = None
+
     sentence_length = 0
 
 
@@ -53,7 +55,16 @@ def find_boulder_from_paragraph(match):
                     tup = (tup[0]+sentence_length, tup[1]+sentence_length)
                     loc_dict[loc] = tup
         
-         
+        if author is None:
+
+            aut_dict, author = find_author(flair_sentence)
+
+            if aut_dict:
+                for aut in aut_dict:
+                    tup = aut_dict[aut] 
+                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
+                    aut_dict[aut] = tup
+
         # Run find size to search the sentence for the size of the boulder
         if size is None:
             siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
@@ -88,20 +99,81 @@ def find_boulder_from_paragraph(match):
 
         sentence_length += len(flair_sentence.to_original_text())
 
-    return loc_dict, siz_pos, rt_dict, location, size, rocktype
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author
+
+
+# Currently Hard coded for report 1 
+
+def find_author(flair_sentence):
+
+    brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
+
+    author = None 
+
+    aut_dict = {}
+
+    for bracket in brackets:
+        if "Report".casefold() in bracket.casefold():
+            
+            author = bracket
+
+            index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
+
+            aut_dict[author] = (index, index + len(bracket))
+
+            return aut_dict, author
+
+        else:
+
+            index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
+            fsentence = Sentence(bracket)
+            tagger.predict(fsentence)
+            for entity in fsentence.to_dict(tag_type='ner')['entities']:
+                for label in entity['labels']:
+                    if "PER" in label.value:
+
+                        if author:
+                            author += ", " + entity['text']
+                        else:
+                            author = entity["text"]
+                        
+                        if not (entity["text"] in aut_dict):
+                            aut_dict[entity["text"]] = (index+entity["start_pos"],index+entity["end_pos"])
+
+    if aut_dict:
+        return aut_dict, author  
+    else:
+        return None, None
 
 # This function analyses a sentence to extract size information relating to height and width 
 
 def find_size(flair_sentence,sentence):
 
-    size = re.search("([0-9]+ (X|x) [0-9]+ (X|x) [0-9]+|[0-9]+ (X|x) [0-9]+)",sentence)
+    size = re.findall("([0-9]+ (X|x) [0-9]+ (X|x) [0-9]+|[0-9]+ (X|x) [0-9]+)",sentence)
 
     # hopefully will just be a simple l x b x h
     if size:
     
-        index = sentence.find(size.group(0))
+        siz_dict = {}
 
-        return {"x" : (index,index+len(size.group(0)))},size.group(0)
+        sizes = None
+
+        for match in size:
+
+            for submatch in list(match):
+
+                if len(submatch) > 3:
+
+                    index = sentence.find(submatch)
+
+                    siz_dict[match] = (index,index+len(submatch))
+
+                    if sizes:
+                        sizes += ", " + submatch 
+                    else:
+                        sizes = submatch
+
+        return siz_dict, sizes            
 
     else: 
     # If not, then check for length and breadth keywords.. not checking specifically for height because height is mentioned alot when desribing boulder locality
@@ -303,9 +375,9 @@ def find_rocktype(flair_sentence, sentence):
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
             if word.casefold() in rocktypes:
-                print(word)
+                # print(word)
                 index = sentence.casefold().find(word.casefold())
-                print(index)
+                # print(index)
                 if first:
                     rt = word
                     first = False
