@@ -63,7 +63,54 @@ class VerfScreen(Screen):
 
     def save_progress(self):
         with open('array.pickle', 'wb') as f:
-            pickle.dump(self.array, f)
+            pickle.dump((self.array,self.word_data), f)
+
+        # create content and add to the popup
+        box = BoxLayout()
+        b1 = Button(text="Export to a pdf")
+        box.add_widget(b1)
+        b2 = Button(text="Dismiss")
+        box.add_widget(b2)
+        popup = Popup(title='Save and Export', content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
+
+        # bind the on_press event of the button to the dismiss function
+        b1.bind(on_press=self.export)
+        b1.bind(on_press=popup.dismiss)
+        b2.bind(on_press=popup.dismiss)
+
+        # open the popup
+        popup.open()
+
+    def export(self,e):
+        index = 0
+
+        pages = []
+
+        for page in self.word_data:
+            
+            pageimg = page[1]
+
+            for boulder in [item[0] for item in self.array if item[4] == index+self.start_page_number]:
+                
+                pageimg = self.highlight_area(pageimg, boulder['FullBB'], 1, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
+
+                if len(boulder['LBB']):
+                    for box in boulder['LBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('green'), outline_width=5)
+
+                if len(boulder['SBB']):
+                    for box in boulder['SBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('red'), outline_width=5)
+
+                if len(boulder['RBB']):
+                    for box in boulder['RBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+
+            pages.append(pageimg)
+
+            index += 1 
+
+        pages[0].save("export.pdf", save_all=True, append_images=pages[1:])
 
     def setup(self, path, page_num, preload):
         
@@ -95,12 +142,11 @@ class VerfScreen(Screen):
 
         elif preload:
 
-            print("beans")
              # create content and add to the popup
             self.start_page_number = int(page_num)
             
             with open(path, 'rb') as f:
-                self.array = pickle.load(f)
+                self.array, self.word_data = pickle.load(f)
             
             theimage = Im.open("./testingsnips/boulder.jpg")
             data = BytesIO()
@@ -145,7 +191,7 @@ class VerfScreen(Screen):
                 for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
                     display_string += word['text'] + " "
                 
-                self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED"))
+                self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED",boulder['Page_Number']))
 
             theimage = Im.open("./testingsnips/boulder.jpg")
             data = BytesIO()
