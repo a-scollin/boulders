@@ -61,7 +61,11 @@ class VerfScreen(Screen):
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
-    def setup(self, path, page_num):
+    def save_progress(self):
+        with open('array.pickle', 'wb') as f:
+            pickle.dump(self.array, f)
+
+    def setup(self, path, page_num, preload):
         
         if path.split('.').pop() != 'pickle' or not str(page_num).isnumeric():
 
@@ -89,9 +93,24 @@ class VerfScreen(Screen):
 
             return False
 
+        elif preload:
+
+            print("beans")
+             # create content and add to the popup
+            self.start_page_number = int(page_num)
+            
+            with open(path, 'rb') as f:
+                self.array = pickle.load(f)
+            
+            theimage = Im.open("./testingsnips/boulder.jpg")
+            data = BytesIO()
+            theimage.save(data, format='png')            
+            data.seek(0) # yes you actually need this
+            im = CoreImage(BytesIO(data.read()), ext='png')
+            self.beeld.texture = im.texture
+
         else:
-
-
+            
             with open(path, 'rb') as f:
                 self.word_data, self.boulder_data = pickle.load(f)
 
@@ -128,12 +147,12 @@ class VerfScreen(Screen):
                 
                 self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED"))
 
-                theimage = Im.open("./testingsnips/boulder.jpg")
-                data = BytesIO()
-                theimage.save(data, format='png')            
-                data.seek(0) # yes you actually need this
-                im = CoreImage(BytesIO(data.read()), ext='png')
-                self.beeld.texture = im.texture
+            theimage = Im.open("./testingsnips/boulder.jpg")
+            data = BytesIO()
+            theimage.save(data, format='png')            
+            data.seek(0) # yes you actually need this
+            im = CoreImage(BytesIO(data.read()), ext='png')
+            self.beeld.texture = im.texture
 
         return True
     def _keyboard_closed(self):
@@ -278,6 +297,7 @@ class MyApp(App):
 
     path = "beans"
     page_num = 0
+    preloaded = False
     def build(self):
         self.title = "Boulder Verification App"
         self.MyScreenManager = ScreenManager()
@@ -287,7 +307,7 @@ class MyApp(App):
 
     def start_verf(self):
         
-        if self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num):
+        if self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num,self.preloaded):
             self.MyScreenManager.current = 'verf'
 
 

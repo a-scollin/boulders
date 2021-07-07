@@ -15,12 +15,15 @@
             path: "./"
             on_selection: app.path = self.selection and self.selection[0] or ''
     BoxLayout:
-        orientation: "vertical"
+        orientation: "horizontal"
         id: first_screen_boxlayout
         size_hint: (1.0,0.1)
         TextInput:
             hint_text: 'Start Page:'
             on_text : app.page_num = self.text
+        ToggleButton:
+            text: 'Preloaded?'
+            on_press : app.preloaded = True if self.state == 'down' else False
         Button:
             text: 'Start!'
             on_press : app.start_verf() 
@@ -87,20 +90,25 @@
             Button:
                 id: accept_button
                 text: "<"
-                size_hint: (0.33, 1)
+                size_hint: (0.25, 1)
                 on_press: root.go_back()
             Button:
                 id: bad_button
                 text: "Bad"
-                size_hint: (0.33, 1)
+                size_hint: (0.25, 1)
                 on_press: root.bad_boulder(False)
+            Button:
+                id: save
+                text: "Save Progress"
+                size_hint: (0.25,1)
+                on_press: root.save_progress()
             Button:
                 id: good_button
                 text: "Good"
-                size_hint: (0.33, 1)
+                size_hint: (0.25, 1)
                 on_press: root.good_boulder(False)
             Button:
                 id: cancel_button
                 text: ">"
-                size_hint: (0.33, 1) 
+                size_hint: (0.25, 1) 
                 on_press: root.go_forward()
