@@ -15,6 +15,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+import pandas as pd
 
 
 
@@ -39,12 +40,16 @@ class LandingScreen(Screen):
 class VerfScreen(Screen):
 
     page_number = StringProperty("")
-
+    focused = False
     current_location = StringProperty("")
     current_rocktype = StringProperty("")
     current_size = StringProperty("")
+    current_bnum = StringProperty("")
+    current_aut = StringProperty("")
+    
     verf = StringProperty("")
     verf_colour = ColorProperty('yellow')
+    
     start_page_number = 0
     boulder_number = StringProperty("")
     rect_box = ObjectProperty(None)
@@ -62,26 +67,66 @@ class VerfScreen(Screen):
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
     def save_progress(self):
+        
+        
+        save_array = []
+
+        for boulder in self.array:
+            if boulder[3] != 'DROPPED':
+                save_array.append(boulder)
+
+            
         with open('array.pickle', 'wb') as f:
-            pickle.dump((self.array,self.word_data), f)
+            pickle.dump((save_array,self.word_data), f)
+
+        self.array = save_array 
+        self.index = 0
+
+        self.update()
+
 
         # create content and add to the popup
         box = BoxLayout()
         b1 = Button(text="Export to a pdf")
         box.add_widget(b1)
-        b2 = Button(text="Dismiss")
+        b2 = Button(text="Export to csv")
         box.add_widget(b2)
+        b3 = Button(text="Dismiss")
+        box.add_widget(b3)
         popup = Popup(title='Save and Export', content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
 
         # bind the on_press event of the button to the dismiss function
-        b1.bind(on_press=self.export)
+        b1.bind(on_press=self.export_pdf)
         b1.bind(on_press=popup.dismiss)
+        b2.bind(on_press=self.export_csv)
         b2.bind(on_press=popup.dismiss)
+        b3.bind(on_press=popup.dismiss)
 
         # open the popup
         popup.open()
 
-    def export(self,e):
+    def export_csv(self,e):
+        
+        
+        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Rocktype' : [], 'Page_Number' : [], 'BNum' : [], 'Author' : [], 'Verified' : []}
+
+
+        for boulder in self.array:
+            d['Numbers'].append(boulder[0]['Numbers'])
+            d['Location'].append(boulder[0]['Location'])
+            d['Size'].append(boulder[0]['Size'])
+            d['Rocktype'].append(boulder[0]['Rocktype'])            
+            d['Page_Number'].append(boulder[0]['Page_Number'])
+            d['BNum'].append(boulder[0]['BNum'])
+            d['Author'].append(boulder[0]['Author'])
+            d['Verified'].append(boulder[3])
+
+        df = pd.DataFrame(data=d)
+
+        df.to_csv(input("Please input the filename :"))
+        
+
+    def export_pdf(self,e):
         index = 0
 
         pages = []
@@ -89,22 +134,50 @@ class VerfScreen(Screen):
         for page in self.word_data:
             
             pageimg = page[1]
+            boxes = []
 
-            for boulder in [item[0] for item in self.array if item[4] == index+self.start_page_number]:
+            for element in [item for item in self.array if item[4] == index+self.start_page_number]:
                 
-                pageimg = self.highlight_area(pageimg, boulder['FullBB'], 1, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
+                boulder = element[0]
+                
+                print(element)
+
+                if element[3] == 'CORRECT':
+                    highlight_colour = 'green'
+                elif element[3] == 'INCORRECT':
+                    highlight_colour = 'red'
+                elif element[3] == 'NOT VERIFIED':
+                    continue
+
+                x,y,x_w,y_h = boulder['FullBB']
+
+                y += 100
+                x += 100
+                y_h -= 100
+                x_w -= 100
+
+                box = (x,y,x_w,y_h)
+                
+                if box not in boxes:
+
+                    pageimg = self.highlight_area(pageimg, box, 0.8, outline_color=ImageColor.getrgb(highlight_colour), outline_width=5)
+                    boxes.append(box)
 
                 if len(boulder['LBB']):
                     for box in boulder['LBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('green'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('pink'), outline_width=5)
 
                 if len(boulder['SBB']):
                     for box in boulder['SBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('red'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
 
                 if len(boulder['RBB']):
                     for box in boulder['RBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+
+                if len(boulder['ABB']):
+                    for box in boulder['ABB']:
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('orange'), outline_width=5)
 
             pages.append(pageimg)
 
@@ -168,7 +241,6 @@ class VerfScreen(Screen):
 
                 area = (area[0]-50,area[1]-50,area[2]+50,area[3]+50)
 
-
                 wd_index = boulder['Page_Number']-self.start_page_number
                 
                 pageimg = self.word_data[wd_index][1]
@@ -186,6 +258,10 @@ class VerfScreen(Screen):
                 if len(boulder['RBB']):
                     for box in boulder['RBB']:
                         pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+
+                if len(boulder['ABB']):
+                    for box in boulder['ABB']:
+                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
 
                 display_string = ""
                 for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
@@ -206,14 +282,28 @@ class VerfScreen(Screen):
         return
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+
+        if self.focused:
+            return False
+
         if keycode[1] == 'r':
             self.go_forward()
         if keycode[1] == 'w':
             self.bad_boulder(True)
         if keycode[1] == 'e':
             self.good_boulder(True)
+        if keycode[1] == 'd':
+            self.drop_boulder(False)
+        if keycode[1] == 'y':
+            self.update_attribute('Location')
+        if keycode[1] == 'u':
+            self.update_attribute('Rocktype')
+        if keycode[1] == 'i':
+            self.update_attribute('Size')
+        if keycode[1] == 'o':
+            self.update_attribute('BNum')
         if keycode[1] == 'p':
-            self.update_location()
+            self.update_attribute('Author')
         elif keycode[1] == 'q':
             self.go_back()
         return True
@@ -223,37 +313,43 @@ class VerfScreen(Screen):
             self.index += 1
         self.update()
 
-    def update_location(self):
+    def togglefocus(self,e):
+        self.focused = True if not self.focused else False 
+    
+    def update_attribute(self, attribute):
 
+        if not self.array[self.index][0][attribute]:
+            self.array[self.index][0][attribute] = ''
+            
+        self.togglefocus(0)
+        box = BoxLayout(orientation="vertical")
+        self.loca = TextInput(text=str(self.array[self.index][0][attribute]),multiline=False)
+        box.add_widget(self.loca)
+        sub_but = Button(text="Submit Changes - " + attribute)
+        dis_but = Button(text="Dismiss")
+        box.add_widget(sub_but)
+        box.add_widget(dis_but)
+        popup = Popup(title=attribute, content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
+        sub_but.bind(on_press = self.submit_attribute)
+        sub_but.bind(on_press = popup.dismiss)
+        dis_but.bind(on_press=self.togglefocus)
+        dis_but.bind(on_press=popup.dismiss)  
+        # open the popup
+        popup.open()        
+
+
+    def submit_attribute(self, button):
         
-        if not self.array[self.index][0]['Location']:
-            return     
-        else:
-
-            box = BoxLayout(orientation="vertical")
-            loca = TextInput(text=self.array[self.index][0]['Location'])
-            box.add_widget(loca)
-
-            sub_but = Button(text="Submit Changes")
-            dis_but = Button(text="Dismiss")
-
-            box.add_widget(sub_but)
-            box.add_widget(dis_but)
-
-            popup = Popup(title='Location', content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
-
-            location = loca.text
-            sub_but.bind(on_press = lambda location, popup: self.submit_location(location, popup))
-            dis_but.bind(on_press=popup.dismiss)            
-
-            # open the popup
-            popup.open()        
-
-    def submit_location(self,loc, popup):
+        self.togglefocus(0)
+        location = self.loca.text
         
-
-        print(loc)
-        popup.dismiss()
+        tmp = list(self.array[self.index])
+        boulder = tmp[0]
+        boulder[button.text.split('-')[1].strip()] = location
+        tmp[0] = boulder
+        self.array[self.index] = tuple(tmp)
+    
+        self.update()
 
     def go_back(self):
         if self.index > 0:
@@ -282,10 +378,21 @@ class VerfScreen(Screen):
             self.index += 1
         self.update()
 
+    def drop_boulder(self,move):
+        if self.index >= 0:
+            self.verf = "DROPPED"
+            tmp = list(self.array[self.index])
+            tmp[3] = self.verf
+            self.array[self.index] = tuple(tmp)
+            
+        if move:
+            self.index += 1
+        self.update()
+
     def update(self):
         
         if self.index != -1:
-
+            self.focused = False
             theimage = self.array[self.index][1]
             data = BytesIO()
             theimage.save(data, format='png')            
@@ -297,6 +404,8 @@ class VerfScreen(Screen):
             self.page_number = "Page Number : " + str(self.array[self.index][0]['Page_Number'])
             self.current_location = "Location : " + str(self.array[self.index][0]['Location'])
             self.current_rocktype = "Rocktype : " + str(self.array[self.index][0]['Rocktype'])
+            self.current_bnum = "Number of Boulders : " + str(self.array[self.index][0]['BNum'])
+            self.current_aut = "Author : " + str(self.array[self.index][0]['Author'])
             self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
             self.verf = self.array[self.index][3]
 
@@ -308,6 +417,9 @@ class VerfScreen(Screen):
             
             if self.verf == "INCORRECT":
                 self.verf_colour = "red"
+
+            if self.verf == "DROPPED":
+                self.verf_colour = "orange"
             
     
         return True

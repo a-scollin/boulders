@@ -1,0 +1,193 @@
+,Numbers,Location,Size,Rocktype,Page_Number,BNum,Author,Verified
+0,0,Aberdeen - Union Street,6 x 5 x 4,Whinstone,21,1,(Reporter—Professor Nicol.),CORRECT
+1,1,Aberdeen,6 x 5 x 4,Whinstone,21,1,(Reporter—Professor Nicol.),INCORRECT
+2,2,Aberdeen,6 x 5 x 4,Whinstone,21,1,(Reporter—Professor Nicol.),INCORRECT
+3,3,Ballater - Morven,,granite,21,1,,CORRECT
+4,4,Belhelvie - Caple Stone,,Gneiss,21,1,"(Reporter—Alex. Cruickshanks, Aberdeen.)",CORRECT
+5,5,Curney - Sienite,,Sienite,21,1,"(Reporter—Alex. Cruickshanks, Aber-",INCORRECT
+6,6,Curney - Sienite,,Sienite,21,1,"(Reporter—Alex. Cruickshanks, Aber-",INCORRECT
+7,7,Bourtie,16 x 6,Greenstone,21,1,,INCORRECT
+8,8,Bourtie,16 x 6,Greenstone,21,1,,INCORRECT
+9,9,Aberdeen,6 x 5 x 4,Whinstone,21,1,(Reporter—Professor Nicol.),INCORRECT
+10,10,Aberdeen,6 x 5 x 4,Whinstone,21,1,(Reporter—Professor Nicol.),INCORRECT
+11,11,vole,,granite,22,1,"(Reporter—>Mr Jamieson, Ellon, in letter to convener % ¢ Hallow ™ fires wore lighted on just October, and were called ¢ Saimh- theine,”  The “ Deil-theine ™ fires were lighted on Ist May. These place times formerly general in the Highlands of Scotland, were probably connected with the worship of tho sun whose departure in autumn and return in spring were signified by these rites The Reve Mr Pratt published an account of PBuchan in the year 1858, and states page 21)",INCORRECT
+12,12,vole,,granite,22,1,"(Reporter—>Mr Jamieson, Ellon, in letter to convener % ¢ Hallow ™ fires wore lighted on just October, and were called ¢ Saimh- theine,”  The “ Deil-theine ™ fires were lighted on Ist May. These place times formerly general in the Highlands of Scotland, were probably connected with the worship of tho sun whose departure in autumn and return in spring were signified by these rites The Reve Mr Pratt published an account of PBuchan in the year 1858, and states page 21)",INCORRECT
+13,13,C('ruden - Boddom Dean,,granite,22,1,"Buchan, Peterhiead, James Mitehell",CORRECT
+14,14,C('ruden - Boddom Dean,,granite,22,1,"Buchan, Peterhiead, James Mitehell",CORRECT
+15,15, - Menie Coast Guard Station,,granite,22,1,,NOT VERIFIED
+16,16, - Menie,,greenstone,23,1,"Jamieson, Geol. Soe. Journ",NOT VERIFIED
+17,17, - Menie,,greenstone,23,1,"Jamieson, Geol. Soe. Journ",NOT VERIFIED
+18,18, - Menie,,greenstone,23,1,"Jamieson, Geol. Soe. Journ",NOT VERIFIED
+19,19, - Buchan,,granite,23,1,,NOT VERIFIED
+20,20, - Buchan,,granite,23,1,,NOT VERIFIED
+21,21,Fllon - Ythan,22 x 9,sienitic,24,1,Jamieson,NOT VERIFIED
+22,22,Fllon - Ythan,22 x 9,sienitic,24,1,Jamieson,NOT VERIFIED
+23,23,Kemnay - Kemnay.,38 x 30 x 10,gneiss,24,1,,NOT VERIFIED
+24,24, - Morven,,sand,25,1,"(Reporter—J. iv Michie, school house Coldstone, Tarland.)",NOT VERIFIED
+25,25, - Morven,,sand,25,1,"(Reporter—J. iv Michie, school house Coldstone, Tarland.)",NOT VERIFIED
+26,26, - Morven,,sand,25,1,"(Reporter—J. iv Michie, school house Coldstone, Tarland.)",NOT VERIFIED
+27,27, - Morven,,sand,25,1,"(Reporter—J. iv Michie, school house Coldstone, Tarland.)",NOT VERIFIED
+28,28,Appin,20 x 18 x 11,Granite,26,1,,NOT VERIFIED
+29,29,Appin,20 x 18 x 11,Granite,26,1,,NOT VERIFIED
+30,30,Duncansburgh - Duncansburgh,,Granite,26,1,"(Reporter—Patrick Gordon, mind Q)",NOT VERIFIED
+31,31,Duncansburgh - Duncansburgh,,Granite,26,1,"(Reporter—Patrick Gordon, mind Q)",NOT VERIFIED
+32,32,Dunoon - Dunoon,21 x 14 x 7,Trap,26,1,"(Reporter—Rev. James Hay, minister of Kirn.)",NOT VERIFIED
+33,33,(ilencoe,,Trap,26,1,"(ilencoe.—Trap boulder about 90 felt in girth and about 10 feet high It is nearly round and lLes on an extensive flat so that very conspicuous from a distance (Reporter—Captain White, R.12.)",NOT VERIFIED
+34,34,liishail - liishail,,Granite,26,1,Campbell,NOT VERIFIED
+35,35,liishail - liishail,,Granite,26,1,Campbell,NOT VERIFIED
+36,36,liishail - liishail,,Granite,26,1,Campbell,NOT VERIFIED
+37,37,wverchaolain - Old Wile,103 x 7 x 53,Gneiss,27,1,"(Reporter—John R. Thompson, schoolmaster Inellan.)",NOT VERIFIED
+38,38,wverchaolain - Old Wile,103 x 7 x 53,Gneiss,27,1,"(Reporter—John R. Thompson, schoolmaster Inellan.)",NOT VERIFIED
+39,39,lona - Island,24 x 18 x 6,Granite,27,1,"Lieporter, Allan M Donald",NOT VERIFIED
+40,40,lona - Island,24 x 18 x 6,Granite,27,1,"Lieporter, Allan M Donald",NOT VERIFIED
+41,41,lona - Island,24 x 18 x 6,Granite,27,1,"Lieporter, Allan M Donald",NOT VERIFIED
+42,42,lona - Island,24 x 18 x 6,Granite,27,1,"Lieporter, Allan M Donald",NOT VERIFIED
+43,43,Nilbrandon - Nilbrandon,,granite,27,1,"(Reporter— Alexander M‘Millan, schoolmaster Kilbrandon.)",NOT VERIFIED
+44,44,Nilbrandon - Nilbrandon,,granite,27,1,"(Reporter— Alexander M‘Millan, schoolmaster Kilbrandon.)",NOT VERIFIED
+45,45,Nilmallie - Nilmallie.,12 x 10 x 10,quartz,27,1,,NOT VERIFIED
+46,46,Kiliore - Kiliore,,Granite,27,1,"C. M*‘Dougall, Dunollie",NOT VERIFIED
+47,47,illy - Suddell,,granite,28,1,"(Reporter—Rev. Jolin G. Levach, Manse of Saddell.)",NOT VERIFIED
+48,48, - Campbelton,,granite,28,1,"(Reporter—DIPro- lessor Nicol, Aberdeen.)",NOT VERIFIED
+49,49, - Southend,,granite,28,1,,NOT VERIFIED
+50,50, - Southend,,granite,28,1,,NOT VERIFIED
+51,51,Coylton. - South Uist,11 x 7,Granite,28,1,"Alexander Car, michael Esq., Mr Macgrigor",NOT VERIFIED
+52,52,Coylton. - South Uist,11 x 7,Granite,28,1,"Alexander Car, michael Esq., Mr Macgrigor",NOT VERIFIED
+53,53,illy - Suddell,,granite,28,1,"(Reporter—Rev. Jolin G. Levach, Manse of Saddell.)",NOT VERIFIED
+54,54,Dunnet - Doone Loch.,25 x 20 x 12,granite,29,2,Jamieson,NOT VERIFIED
+55,55,Boyndie - Turnberry Point,,granite,29,1,"(Reporter—James Iunter, Academy, Banft.)",NOT VERIFIED
+56,56,Fordyce - Greywacke,17 x 13,whinstone,29,2,,NOT VERIFIED
+57,57,Maybole—Granite - Maybole,,Granite,29,1,,NOT VERIFIED
+58,58,Dunnet - Doone Loch.,25 x 20 x 12,granite,29,2,Jamieson,NOT VERIFIED
+59,59,Boyndie - Turnberry Point,,granite,29,1,"(Reporter—James Iunter, Academy, Banft.)",NOT VERIFIED
+60,60,Fordyce - Greywacke,17 x 13,whinstone,29,2,,NOT VERIFIED
+61,61,Fordyce - Greywacke,17 x 13,whinstone,29,2,,NOT VERIFIED
+62,62,Fordyce - Greywacke,17 x 13,whinstone,29,2,,NOT VERIFIED
+63,63,Dunnet - Doone Loch.,25 x 20 x 12,granite,29,2,Jamieson,NOT VERIFIED
+64,64,locality - Olrichh,,granite,30,1,,NOT VERIFIED
+65,65,less - XNear Castletown,,granite,30,1,,NOT VERIFIED
+66,66,less - XNear Castletown,,granite,30,1,,NOT VERIFIED
+67,67,T'ynron,,conglomerate,30,3,(Reporters —Joln Cleghorn and J. Anderson.),NOT VERIFIED
+68,68,Wamphray - I'rag,,Granite,30,1,,NOT VERIFIED
+69,69,Wamphray - I'rag,,Granite,30,1,,NOT VERIFIED
+70,70,less - XNear Castletown,,granite,30,1,,NOT VERIFIED
+71,71,T'ynron,,conglomerate,30,3,(Reporters —Joln Cleghorn and J. Anderson.),NOT VERIFIED
+72,72,Wamphray - I'rag,,Granite,30,1,,NOT VERIFIED
+73,73,Dallas,,Greenstone,31,1,Fleming,NOT VERIFIED
+74,74,Dallas,,Greenstone,31,1,Fleming,NOT VERIFIED
+75,75,Dallas,,Greenstone,31,1,Fleming,NOT VERIFIED
+76,76,Dallas,,Greenstone,31,1,Fleming,NOT VERIFIED
+77,77,Duffus - West Calder.,,sandstone,31,1,,NOT VERIFIED
+78,78,Dallas,,Greenstone,31,1,Fleming,NOT VERIFIED
+79,79,Duffus - West Calder.,,sandstone,31,1,,NOT VERIFIED
+80,80,Elgin,15 x 10 x 8,Conglomerate,31,1,"(Reporter—John Martin, South Guildry Strect, Elgin.)",NOT VERIFIED
+81,81,Elgin,15 x 10 x 8,Conglomerate,31,1,"(Reporter—John Martin, South Guildry Strect, Elgin.)",NOT VERIFIED
+82,82,Elgin,15 x 10 x 8,Conglomerate,31,1,"(Reporter—John Martin, South Guildry Strect, Elgin.)",NOT VERIFIED
+83,83,Elgin,15 x 10 x 8,Conglomerate,31,1,"(Reporter—John Martin, South Guildry Strect, Elgin.)",NOT VERIFIED
+84,84,Forres,8 x 8,Conglomerate,31,1,(Reporter—Jolin Martin.),NOT VERIFIED
+85,85,"Llanbryde, - Llanbryde",15 x 9 x 7,Gneiss,31,1,(Reporter—John Martin.),NOT VERIFIED
+86,86,Barry,,hornblende,32,6,(Reporter—John Martin.),NOT VERIFIED
+87,87,Barry,,hornblende,32,6,(Reporter—John Martin.),NOT VERIFIED
+88,88,Crail - Balcomie,12 x 8 x 74,Granite,32,1,"(Reporter—Captain White, R.E.)",NOT VERIFIED
+89,89,Crail - Balcomie,12 x 8 x 74,Granite,32,1,"(Reporter—Captain White, R.E.)",NOT VERIFIED
+90,90,Benholm,"18 x 12 x 3, 6 x 4",granite,32,1,(Reporter—Robert Bell. Pitconochie.),NOT VERIFIED
+91,91,Newburgh - Newburgh.,,gneiss,32,1,Dr Fleming,NOT VERIFIED
+92,92,Barry,,hornblende,32,6,(Reporter—John Martin.),NOT VERIFIED
+93,93,Benholm,"18 x 12 x 3, 6 x 4",granite,32,1,(Reporter—Robert Bell. Pitconochie.),NOT VERIFIED
+94,94,Benholm,"18 x 12 x 3, 6 x 4",granite,32,1,(Reporter—Robert Bell. Pitconochie.),NOT VERIFIED
+95,95,Kirriemuir - Carmyllie.,,gneiss,33,1,(Reporter—Rev. George Anderson.),NOT VERIFIED
+96,96,Cortachy,13 x 10 x 8,trap,33,1,(Reporter—Rev. Geo. Gordon Milne.),NOT VERIFIED
+97,97, - Reswallie,,mica,33,1,,NOT VERIFIED
+98,98,Inverarity—Two,,granite,33,2,(Reporter—Rev. Patrick Steven- SO1.),NOT VERIFIED
+99,99,Kirriemuir - Carmyllie.,,gneiss,33,1,(Reporter—Rev. George Anderson.),NOT VERIFIED
+100,100,Liff,,Mica,34,1,"(Reporters —James Powrie, Esq., Reswallie, Forfar; P. Anthony Anton, St Regulus Cottage, St Andrews,)",NOT VERIFIED
+101,101,Menmuir,,Granite,34,1,"(Reporter—Itev, Mark Anderson, Mennmir, Drechin.)",NOT VERIFIED
+102,102,Menmuir,,Granite,34,1,"(Reporter—Itev, Mark Anderson, Mennmir, Drechin.)",NOT VERIFIED
+103,103,Rescobie.~Mica,,slate,34,1,"harles Lyell, Creigh Till",NOT VERIFIED
+104,104,Rescobie.~Mica,,slate,34,1,"harles Lyell, Creigh Till",NOT VERIFIED
+105,105,Rescobie.~Mica,,slate,34,1,"harles Lyell, Creigh Till",NOT VERIFIED
+106,106,  - St Tigeans.,,Gneiss,35,1,(Reporter— Rev. James Strachan.),NOT VERIFIED
+107,107,  - St Tigeans.,,Gneiss,35,1,(Reporter— Rev. James Strachan.),NOT VERIFIED
+108,108,North - North Uist.,,gneiss,35,2,,NOT VERIFIED
+109,109,North - North Uist.,,gneiss,35,2,,NOT VERIFIED
+110,110,North - North Uist.,,gneiss,35,2,,NOT VERIFIED
+111,111,North - North Uist.,,gneiss,35,2,,NOT VERIFIED
+112,112,North - North Uist.,,gneiss,35,2,,NOT VERIFIED
+113,113, - Stornoway,,gneiss,36,1,"(Reporter—J>Mr Peter Liddell, Gregs, by Stornoway.)",NOT VERIFIED
+114,114, - Stornoway,,gneiss,36,1,"(Reporter—J>Mr Peter Liddell, Gregs, by Stornoway.)",NOT VERIFIED
+115,115, - Tiree,,clay,42,100,,NOT VERIFIED
+116,116, - Tiree,,clay,42,100,,NOT VERIFIED
+117,117,Ndmallie - Ndmallie,,Quartz,42,15,,NOT VERIFIED
+118,118,Kltarlity - Lord Lovat,,whinstone,43,2,,NOT VERIFIED
+119,119,Lochaber - Lochaber.,14 x 8,granite,43,1,ralg Dlin,NOT VERIFIED
+120,120,Lochaber - Lochaber.,14 x 8,granite,43,1,ralg Dlin,NOT VERIFIED
+121,121,dloway - Morvern,Length :17 Breadth : None Height : None,granite,44,1,"(rlessel Railway Station, a boulder called the ** Bishop’s Stone; 7 circumference 44 feet height above ground & feet estimated to weigh 70 tons bluish granite differing fiom adjoining granite rocks An ancient stone circle of boulders about 200 yards distant (Reporter—Sir James DBurnett of (‘rathes.)",NOT VERIFIED
+122,122,dloway - Morvern,Length :17 Breadth : None Height : None,granite,44,1,"(rlessel Railway Station, a boulder called the ** Bishop’s Stone; 7 circumference 44 feet height above ground & feet estimated to weigh 70 tons bluish granite differing fiom adjoining granite rocks An ancient stone circle of boulders about 200 yards distant (Reporter—Sir James DBurnett of (‘rathes.)",NOT VERIFIED
+123,123,dloway - Morvern,Length :17 Breadth : None Height : None,granite,44,1,"(rlessel Railway Station, a boulder called the ** Bishop’s Stone; 7 circumference 44 feet height above ground & feet estimated to weigh 70 tons bluish granite differing fiom adjoining granite rocks An ancient stone circle of boulders about 200 yards distant (Reporter—Sir James DBurnett of (‘rathes.)",NOT VERIFIED
+124,124,dloway - Morvern,Length :17 Breadth : None Height : None,granite,44,1,"(rlessel Railway Station, a boulder called the ** Bishop’s Stone; 7 circumference 44 feet height above ground & feet estimated to weigh 70 tons bluish granite differing fiom adjoining granite rocks An ancient stone circle of boulders about 200 yards distant (Reporter—Sir James DBurnett of (‘rathes.)",NOT VERIFIED
+125,125,Fettercairn—XNo,,sand,44,1,,NOT VERIFIED
+126,126,Kclls - Craigenbay Farm,,whinstone,45,1,"(Reporter—Robert Wallace, Auchenbrack, Tyunron.)",NOT VERIFIED
+127,127,irkbean - Arbigland,16 x 9,Granite,45,1,,NOT VERIFIED
+128,128, - Criftel,,Granite,45,1,"(Reporter—Rev, James Fraser, Colvend Manse, by Dalbeattie)",NOT VERIFIED
+129,129, - Criftel,,Granite,45,1,"(Reporter—Rev, James Fraser, Colvend Manse, by Dalbeattie)",NOT VERIFIED
+130,130,Penningliome - Penningliome.,,Granite,45,1,"(Reporters—Rev, William M-",NOT VERIFIED
+131,131,Penningliome - Penningliome.,,Granite,45,1,"(Reporters—Rev, William M-",NOT VERIFIED
+132,132,Twynlolin - Twynlolin.,,Granite,45,6,,NOT VERIFIED
+133,133,Corrluke,,granite,46,1,"(Reporter—D. IR, IR.)",NOT VERIFIED
+134,134,Curne - Curne,,Whinstone,46,3,(Reporter—Iev. Mr M- Lean.),NOT VERIFIED
+135,135,Auldearn - Auldearn.,,Sandstone,46,1,,NOT VERIFIED
+136,136,Auldearn - Auldearn.,,Sandstone,46,1,,NOT VERIFIED
+137,137, - ORKNEY,,conglomerate,47,1,,NOT VERIFIED
+138,138,Honsay - Piper’s Hill,,Sandstone,47,1,,NOT VERIFIED
+139,139, - Nairnshire,,conglomerate,47,1,"(Reporters—W, Stables, Iisq., commissioner and his clerk Mr John Grant, (Cawdor Castle.)",NOT VERIFIED
+140,140,(yoy—Conglomerate - Sketeh,,Conglomerate,47,1,"(yoy—Conglomerate boulder called © Tomreach,” about 15 felt high and girth of 27 yards Abont 500 or 400 felt above sea  Sketeh sent  (Reporter—Captain White, RUIC)",NOT VERIFIED
+141,141,Irith - Dressay,,conglomerate,47,4,(Reporter—School- master Irith and Stennis (Orkney),NOT VERIFIED
+142,142,Irith - Dressay,,conglomerate,47,4,(Reporter—School- master Irith and Stennis (Orkney),NOT VERIFIED
+143,143,Honsay - Piper’s Hill,,Sandstone,47,1,,NOT VERIFIED
+144,144,Aberfclily - Orkney,,Gneiss,48,1,"Gr. Miller, Cross",NOT VERIFIED
+145,145,considerable - Shetland,,Conglomerate,48,1,,NOT VERIFIED
+146,146,cent - North Unst.,,granite,48,1,"(Reporter—James Palmey, schoolmaster Kivkurd, Dolphinton.)",NOT VERIFIED
+147,147,cent - North Unst.,,granite,48,1,"(Reporter—James Palmey, schoolmaster Kivkurd, Dolphinton.)",NOT VERIFIED
+148,148,cent - North Unst.,,granite,48,1,"(Reporter—James Palmey, schoolmaster Kivkurd, Dolphinton.)",NOT VERIFIED
+149,149,considerable - Shetland,,Conglomerate,48,1,,NOT VERIFIED
+150,150, - Tullypowrie,,mica,49,2,,NOT VERIFIED
+151,151, - Tullypowrie,,mica,49,2,,NOT VERIFIED
+152,152, - Tullypowrie,,mica,49,2,,NOT VERIFIED
+153,153, - Tullypowrie,,mica,49,2,,NOT VERIFIED
+154,154, - Tullypowrie,,mica,49,2,,NOT VERIFIED
+155,155, - Pitnacree House,15 x 111,schist,49,1,"(Reporter—DMr M¢Naughton, merchant Tullypowrie)",NOT VERIFIED
+156,156,Aucltergaven,10 x 8,Granite,49,1,,NOT VERIFIED
+157,157,Cullendor - Cullendor,,conglomerate,50,1,Stirhng,NOT VERIFIED
+158,158,Comrie—1our - Comrie,135 x 9,whinstone,50,1,Wm. F. Swan,NOT VERIFIED
+159,159,Crieff,16 x 10 x 5,Conglomerate,50,1,,NOT VERIFIED
+160,160,Crieff,16 x 10 x 5,Conglomerate,50,1,,NOT VERIFIED
+161,161, - Abercairney,,granite,50,1,,NOT VERIFIED
+162,162,Doune - Doune,,Conglomerate,50,1,Milue lHome,NOT VERIFIED
+163,163,Fortingall - Black Wood,,Gneiss,50,1,,NOT VERIFIED
+164,164,Fowlis—Two - Fowlis,,granite,51,2,(Reporter—Rev. Thomas Hardy.),NOT VERIFIED
+165,165,Kilspindie - N.W.,,granite,51,7,"(Reporter—James M‘Kerracher, schoolmaster by Errol.)",NOT VERIFIED
+166,166,Logic - Logic Almond.,,Whinstone,51,1,,NOT VERIFIED
+167,167, - Loulder,,conglomerate,51,1,"(Reporter—Rev. Patrick Macgregor, Logie Almond Manse.)",NOT VERIFIED
+168,168, - Loulder,,conglomerate,51,1,"(Reporter—Rev. Patrick Macgregor, Logie Almond Manse.)",NOT VERIFIED
+169,169,Methven - Methven,,Whinstone,51,1,(Reporter— William Duft),NOT VERIFIED
+170,170,Pitlochrie—1.,,mica,51,1,,NOT VERIFIED
+171,171,Applecross - Straloch,,granite,52,1,"(Reporter—Rev. Dr Robertson, Straloeh.)",NOT VERIFIED
+172,172,Applecross - Straloch,,granite,52,1,"(Reporter—Rev. Dr Robertson, Straloeh.)",NOT VERIFIED
+173,173,Den - Glenballoeh Stone,6 x 6,Mica,52,6,"(Reporter— Rev. Mr Herdman, Rattray.)",NOT VERIFIED
+174,174,Alness,22 x 17 x 12,granite,52,1,"(Reporters, —Tobert Graham, D.D.; and RR. L. Jack ((reol. Survey)",NOT VERIFIED
+175,175,Alness,22 x 17 x 12,granite,52,1,"(Reporters, —Tobert Graham, D.D.; and RR. L. Jack ((reol. Survey)",NOT VERIFIED
+176,176,Applecross - Straloch,,granite,52,1,"(Reporter—Rev. Dr Robertson, Straloeh.)",NOT VERIFIED
+177,177,Den - Glenballoeh Stone,6 x 6,Mica,52,6,"(Reporter— Rev. Mr Herdman, Rattray.)",NOT VERIFIED
+178,178,Edderton - Edderton.,23 x 19 x 12,Granite,53,1,"(Reporter—Rev. Ewen M:Ewen, parish mimster.)",NOT VERIFIED
+179,179,Fannich,30 x 10 x 5,gneiss,53,1,,NOT VERIFIED
+180,180,Lochyair,"28 x 17 x 16, 23 x 101 x 7",granite,54,2,,NOT VERIFIED
+181,181,Lochyair,"28 x 17 x 16, 23 x 101 x 7",granite,54,2,,NOT VERIFIED
+182,182,Shieldag - Shieldag,,Granite,54,1,"(Reporter —Rev. Alex. C. M¢Iutyre, Shieldag Manse, Dingwall.)",NOT VERIFIED
+183,183,Lorn - OLd Red Sandstone,,Sandstone,54,1,(Reporter—Robert Gordon.),NOT VERIFIED
+184,184,Tarbat - Tarbat.,,granite,54,7,"(Reporter—Rev. George Campbell, parish mimster.)",NOT VERIFIED
+185,185,Alloa,13 x 11,Porphyry,54,1,,NOT VERIFIED
+186,186,Kilsyth,,Mica,55,1,(Reporter—R. L. Jack (Geol. Survey),NOT VERIFIED
+187,187,Strathblane,,Conglomerate,55,1,,NOT VERIFIED
+188,188,Golspie,,Sandstone,55,1,"(Reporter—Rev. James Joass, minister of Golspie.)",NOT VERIFIED
+189,189,Golspie,,Sandstone,55,1,"(Reporter—Rev. James Joass, minister of Golspie.)",NOT VERIFIED
+190,190,Glasserton - Applecross Hills,,Granite,56,1,XNicol,NOT VERIFIED
+191,191,Glasserton - Applecross Hills,,Granite,56,1,XNicol,NOT VERIFIED

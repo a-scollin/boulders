@@ -66,6 +66,14 @@
                 id: size_title
                 text: root.current_size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: bnum_title
+                text: root.current_bnum
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: aut_title
+                text: root.current_aut
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
 
                
                 
@@ -81,6 +89,7 @@
             TextInput:
                 id: verf_text
                 text: root.currenttext
+                focus: True 
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
         BoxLayout:
             id: button_boxlayout
