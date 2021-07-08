@@ -6,6 +6,7 @@ from flair.models import MultiTagger
 from flair.models import SequenceTagger
 from flair.tokenization import SegtokSentenceSplitter
 import string
+from word2number import w2n
 
 # load the NER tagger
 tagger = MultiTagger.load(['pos','ner'])
@@ -32,14 +33,23 @@ def find_boulder_from_paragraph(match):
 
     author = None
 
+    numberofboulders = None
+
     sentence_length = 0
 
+    firstsentence = True
 
 
     for flair_sentence in sentences:
         
         # predict NER and POS tags
         tagger.predict(flair_sentence)
+
+        if firstsentence:
+
+            if numberofboulders is None:
+
+                numberofboulders = find_number(flair_sentence)
 
         # Run find location to search the sentence for the location of the boulder. 
         if location is None:
@@ -92,18 +102,29 @@ def find_boulder_from_paragraph(match):
                     tup = (tup[0]+sentence_length, tup[1]+sentence_length)
                     rt_dict[rt] = tup
 
-        
+        firstsentence = False
         # # If we have all features stop searching 
         # if size and location and rocktype:
         #     break
 
         sentence_length += len(flair_sentence.to_original_text())
 
-    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders
 
+
+def find_number(flair_sentence):
+    for entity in flair_sentence.to_dict(tag_type='pos')['entities']:    
+        for label in entity['labels']:
+            if "CD" in label.value:
+                if not entity['text'].strip().isnumeric() and entity['text'].strip().isalpha():
+                    try:
+                        ret = int(w2n.word_to_num(entity['text']))
+                        return ret
+                    except:
+                        return 1
+    return 1
 
 # Currently Hard coded for report 1 
-
 def find_author(flair_sentence):
 
     brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
