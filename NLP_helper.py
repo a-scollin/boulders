@@ -39,6 +39,7 @@ def find_boulder_from_paragraph(match):
 
     firstsentence = True
 
+    extra = None
 
     for flair_sentence in sentences:
         
@@ -50,6 +51,29 @@ def find_boulder_from_paragraph(match):
             if numberofboulders is None:
 
                 numberofboulders = find_number(flair_sentence)
+
+        if extra is None:
+
+            extra_dict, extra = find_extra(flair_sentence,flair_sentence.to_original_text())
+
+            if extra_dict:
+                for ext in extra_dict:
+                    tup = extra_dict[ext] 
+                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
+                    extra_dict[ext] = tup
+        
+        else:
+
+            ext_dict, ext_string = find_extra(flair_sentence, flair_sentence.to_original_text())
+
+            if ext_dict:
+                for ext in ext_dict:
+                    if ext not in extra_dict:
+                        tup = ext_dict[ext] 
+                        tup = (tup[0]+sentence_length, tup[1]+sentence_length)
+                        extra_dict[ext] = tup
+                        extra += ' - ' + str(ext)
+
 
         # Run find location to search the sentence for the location of the boulder. 
         if location is None:
@@ -109,7 +133,39 @@ def find_boulder_from_paragraph(match):
 
         sentence_length += len(flair_sentence.to_original_text())
 
-    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra
+
+
+ext_features = []
+with open('./dictionaries/extra.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            ext_features.append(word)          
+
+def find_extra(flair_sentence, sentence):
+    ext_dict = {}
+    extra = ""
+    first = True
+    if any(ext.casefold() in sentence.casefold() for ext in ext_features):
+        for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
+            if word.casefold() in ext_features:
+                # print(word)
+                index = sentence.casefold().find(word.casefold())
+                # print(index)
+                if first:
+                    extra = word
+                    first = False
+                if not(word in ext_dict):
+                    ext_dict[word] = (index,index + len(word))
+    if ext_dict:
+        return ext_dict, extra
+    else:
+        return None, None
+
 
 
 def find_number(flair_sentence):
@@ -136,6 +192,9 @@ def find_author(flair_sentence):
     for bracket in brackets:
         if "Report".casefold() in bracket.casefold():
             
+            if len(bracket) > 100:
+                continue
+
             author = bracket
 
             index = flair_sentence.to_original_text().casefold().find(bracket.casefold())

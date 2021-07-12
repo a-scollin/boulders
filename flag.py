@@ -46,6 +46,7 @@ class VerfScreen(Screen):
     current_size = StringProperty("")
     current_bnum = StringProperty("")
     current_aut = StringProperty("")
+    current_ext = StringProperty("")
     
     verf = StringProperty("")
     verf_colour = ColorProperty('yellow')
@@ -108,7 +109,7 @@ class VerfScreen(Screen):
     def export_csv(self,e):
         
         
-        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Rocktype' : [], 'Page_Number' : [], 'BNum' : [], 'Author' : [], 'Verified' : []}
+        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Rocktype' : [], 'Page_Number' : [], 'Extra' : [], 'BNum' : [], 'Author' : [], 'Verified' : []}
 
 
         for boulder in self.array:
@@ -118,6 +119,7 @@ class VerfScreen(Screen):
             d['Rocktype'].append(boulder[0]['Rocktype'])            
             d['Page_Number'].append(boulder[0]['Page_Number'])
             d['BNum'].append(boulder[0]['BNum'])
+            d['Extra'].append(boulder[0]['Extra'])
             d['Author'].append(boulder[0]['Author'])
             d['Verified'].append(boulder[3])
 
@@ -178,6 +180,10 @@ class VerfScreen(Screen):
                 if len(boulder['ABB']):
                     for box in boulder['ABB']:
                         pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('orange'), outline_width=5)
+                
+                if len(boulder['EBB']):
+                    for box in boulder['EBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
 
             pages.append(pageimg)
 
@@ -263,6 +269,10 @@ class VerfScreen(Screen):
                     for box in boulder['ABB']:
                         pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
 
+                if len(boulder['EBB']):
+                    for box in boulder['EBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+
                 display_string = ""
                 for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
                     display_string += word['text'] + " "
@@ -304,6 +314,9 @@ class VerfScreen(Screen):
             self.update_attribute('BNum')
         if keycode[1] == 'p':
             self.update_attribute('Author')
+        if keycode[1] == 'l':
+            self.update_attribute('Extra')
+        
         elif keycode[1] == 'q':
             self.go_back()
         return True
@@ -405,6 +418,7 @@ class VerfScreen(Screen):
             self.current_location = "Location : " + str(self.array[self.index][0]['Location'])
             self.current_rocktype = "Rocktype : " + str(self.array[self.index][0]['Rocktype'])
             self.current_bnum = "Number of Boulders : " + str(self.array[self.index][0]['BNum'])
+            self.current_ext = "Extra : " + str(self.array[self.index][0]['Extra'])
             self.current_aut = "Author : " + str(self.array[self.index][0]['Author'])
             self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
             self.verf = self.array[self.index][3]

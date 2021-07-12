@@ -61,6 +61,7 @@ def review_vol(number):
 # TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
 def get_boulders(word_data):
 
+
     numbers = []
 
     locations = []
@@ -70,6 +71,8 @@ def get_boulders(word_data):
     rocktypes = []
 
     authors = []
+
+    extras = []
 
     array_numberofboulders = []
 
@@ -88,6 +91,8 @@ def get_boulders(word_data):
     aut_boundings = []
 
     par_nums = []
+
+    extra_boundings = []
 
     number = 0
 
@@ -111,10 +116,20 @@ def get_boulders(word_data):
 
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
-        
+        pd.set_option("display.max_rows", None, "display.max_columns", None)
+
+
         p_nums = []
 
+        for k, word in word_data[i][0].iterrows():
+            if word['par_num'] > 1:
+                break
 
+        if len(word_data[i][0]['par_num']):
+            word_data[i][0].loc[(word_data[i][0].par_num == 1) & (word_data[i][0].index > k), 'par_num'] = max(word_data[i][0]['par_num'])
+
+
+    
         # For each word in the page : 
 
 
@@ -143,6 +158,7 @@ def get_boulders(word_data):
                 siz_bound = []
                 rt_bound = []
                 aut_bound = []
+                extra_bound = []
                 
                 (x, y, w, h) = (row['left'], row['top'], row['width'], row['height'])
                 cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 5)
@@ -152,7 +168,7 @@ def get_boulders(word_data):
 
                 # Use paragraph where boulder search term was found for analysis
                 
-                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, extra_pos, extra = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
                 
 
@@ -161,6 +177,7 @@ def get_boulders(word_data):
                 siz_char_count = 0
                 rt_char_count = 0 
                 aut_char_count = 0
+                ext_char_count = 0
 
                 for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
@@ -186,6 +203,17 @@ def get_boulders(word_data):
                     
 
                         aut_char_count += len(word['text']) + 1
+
+                    if extra_pos:
+                        for dim in extra_pos:
+                            if ext_char_count >= extra_pos[dim][0] and ext_char_count <= extra_pos[dim][1]:
+                                (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 100, 100), 5)
+
+                                extra_bound.append((x,y,x+w,y+h))
+                    
+
+                        ext_char_count += len(word['text']) + 1
 
                     if loc_pos:
                         for dim in loc_pos:
@@ -242,6 +270,7 @@ def get_boulders(word_data):
                     sizes.append(size)
                     rocktypes.append(rocktype)
                     authors.append(author)
+                    extras.append(extra)
                     array_numberofboulders.append(numberofboulders)
                     aut_boundings.append(aut_bound)
                     page_numbers.append(page_number)
@@ -249,6 +278,7 @@ def get_boulders(word_data):
                     siz_boundings.append(siz_bound)
                     rt_boundings.append(rt_bound)
                     b_boundings.append(b_bound)
+                    extra_boundings.append(extra_bound)
                     full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
                     par_nums.append(row['par_num'])
                     cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
@@ -257,7 +287,7 @@ def get_boulders(word_data):
 
 
         if print_page:
-            d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+            d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
             print(d)
             cv2.imshow("Page : " + str(page_number), img)
             cv2.waitKey(0)
@@ -267,7 +297,7 @@ def get_boulders(word_data):
         page_number += 1
  
 
-    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
      
     df = pd.DataFrame(data=d)
 
