@@ -316,6 +316,8 @@ class VerfScreen(Screen):
             self.update_attribute('Author')
         if keycode[1] == 'l':
             self.update_attribute('Extra')
+        if keycode[1] == 'k':
+            self.set_full()
         
         elif keycode[1] == 'q':
             self.go_back()
@@ -438,7 +440,18 @@ class VerfScreen(Screen):
     
         return True
 
-    
+    def set_full(self):
+
+        if self.index != -1:
+            boulder = self.array[self.index][0]
+            wd_index = boulder['Page_Number']-self.start_page_number    
+            theimage = self.word_data[wd_index][1]
+            theimage = self.highlight_area(theimage,boulder['FullBB'],1, outline_color=ImageColor.getrgb('black'), outline_width=5)
+            data = BytesIO()
+            theimage.save(data, format='png')            
+            data.seek(0) # yes you actually need this
+            im = CoreImage(BytesIO(data.read()), ext='png')
+            self.beeld.texture = im.texture
 
 
     def highlight_area(self, img, region, factor, outline_color=None, outline_width=1):
