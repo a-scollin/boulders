@@ -54,8 +54,13 @@ def review_vol(number):
 
     # Saving output
 
+    if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
+        with open('boulder_data' + str(number) + '.pickle', 'wb') as f:
+            pickle.dump((word_data, df), f)
+
     if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
         df.to_csv(input("Please enter filename"))
+
 
 
 # TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
@@ -110,6 +115,9 @@ def get_boulders(word_data):
 
     # For each dataframe in word_data ie each page :
 
+    getting_location = False
+    general_location = ""
+
     for i in range(0,len(word_data)):
 
         print("Analysing page : " + str(page_number))
@@ -129,14 +137,33 @@ def get_boulders(word_data):
             word_data[i][0].loc[(word_data[i][0].par_num == 1) & (word_data[i][0].index > k), 'par_num'] = max(word_data[i][0]['par_num'])
 
 
-    
+        last_rocktype = ""
+        last_size = ""
+        last_location = ""
+
         # For each word in the page : 
 
-
+        
 
         for j, row in word_data[i][0].iterrows():
             
             # if the word is a boulder related search term, look for the boulders features! 
+
+            if getting_location or'.—' in row['text'] or ('-' in row['text'] and row['text'].split('-').pop().isupper()):
+                
+                if not getting_location:
+
+                    general_location = ""
+
+                    getting_location = True
+                
+                if re.sub(r"[,.—;@#?!&$]+\ *", "", row['text']).isupper():
+                    general_location += row['text'] + " "
+                    continue
+                else:
+                    getting_location = False
+
+                    print(general_location)
 
             if ("boulder" in row['text']):
 
@@ -170,7 +197,8 @@ def get_boulders(word_data):
                 
                 loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, extra_pos, extra = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
-                
+                if len(general_location) and location:
+                    location = general_location + '-' + location 
 
                 # Highlight each word related to the boudlers features .. 
                 loc_char_count = 0
@@ -182,10 +210,10 @@ def get_boulders(word_data):
                 for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
                     if word['left'] < least_x:
-                            least_x = word['left']     
+                        least_x = word['left']     
 
                     if word['left'] + word['width'] > greatest_x_w:
-                            greatest_x_w = word['left'] + word['width']    
+                        greatest_x_w = word['left'] + word['width']    
                             
                     if word['top'] < least_y:
                         least_y = word['top']  
@@ -250,20 +278,32 @@ def get_boulders(word_data):
                 if not location and len(locations) and page_number == page_numbers[len(page_numbers) - 1]:
                     location = locations[len(locations) - 1]
                     loc_pos = loc_boundings[len(loc_boundings) - 1]
+                elif not location and len(general_location):
+                    location = general_location 
 
-
-
-        
                 # If we have a location and rocktype it qualifies as a boulder ! 
-                if location and rocktype:
+                
+              
+                if not location:
+                    location = ""                    
+
+                if not size:
+                    size = ""                    
+                
+                if not rocktype:
+                    rocktype = ""                    
+        
+                if not (location == last_location and size == last_size and rocktype == last_rocktype):
                     
+
+                    last_rocktype = rocktype
+                    last_size = size
+                    last_location = location
+                
                     least_y -= 100
                     least_x -= 100
                     greatest_y_h += 100
                     greatest_x_w += 100
-
-                    
-
 
                     numbers.append(number)
                     locations.append(location)

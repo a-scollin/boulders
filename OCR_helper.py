@@ -34,12 +34,14 @@ def OCR_pre_process_image(image):
     open_cv_image = np.array(image.convert('RGB')) 
     grayscaled = cv2.cvtColor(open_cv_image,cv2.COLOR_BGR2GRAY)
 
+    
 
-    clean = cv2.fastNlMeansDenoising(grayscaled, h=50)
-    kernel = np.ones((1,1),np.uint8)
-    erosion = cv2.erode(clean,kernel,iterations = 1)
+
+    # clean = cv2.fastNlMeansDenoising(grayscaled, h=50)
+    # kernel = np.ones((1,1),np.uint8)
+    # erosion = cv2.erode(clean,kernel,iterations = 1)
     
   
 
-    return Image.fromarray(erosion)
+    return Image.fromarray(grayscaled)
    

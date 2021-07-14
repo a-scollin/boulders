@@ -146,8 +146,10 @@ class VerfScreen(Screen):
 
                 if element[3] == 'CORRECT':
                     highlight_colour = 'green'
+                    highlight_amount = 0.8
                 elif element[3] == 'INCORRECT':
                     highlight_colour = 'red'
+                    highlight_amount = 1 
                 elif element[3] == 'NOT VERIFIED':
                     continue
 
@@ -162,7 +164,7 @@ class VerfScreen(Screen):
                 
                 if box not in boxes:
 
-                    pageimg = self.highlight_area(pageimg, box, 0.8, outline_color=ImageColor.getrgb(highlight_colour), outline_width=5)
+                    pageimg = self.highlight_area(pageimg, box, highlight_amount, outline_color=ImageColor.getrgb(highlight_colour), outline_width=5)
                     boxes.append(box)
 
                 if len(boulder['LBB']):

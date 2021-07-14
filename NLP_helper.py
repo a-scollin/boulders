@@ -477,7 +477,7 @@ def find_location(flair_sentence,match):
     loc_dict = {}
 
     # Manual override for first report as the text orientation is consistent
-    if True:
+    if False:
         senlen = 0
         for word in match.iterrows():
             if word[1]['left'] < 900:
@@ -486,7 +486,7 @@ def find_location(flair_sentence,match):
                     loc_dict[word[1]["text"]] = (senlen,senlen+len(word[1]))
             senlen += len(word[1]['text'])
     
-    location = location.split(".—")[0]
+        location = location.split(".—")[0]
 
     first = True
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:

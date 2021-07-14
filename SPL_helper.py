@@ -12,16 +12,19 @@ import math
 # This function returns the data frame and word string of the OCR'ed volume number that is passed to it also corrects general mispellings 
 
 def get_spellchecked_volume(number):
-
+    
+    
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)
     unchecked_words = []    
     word_data = []
-
+    pd.set_option("display.max_rows", None, "display.max_columns", None)
     for image in images:
         df = OCR.read_image_to_df(image)
         for word in df["text"]:
             unchecked_words.append(word)
-             
+        
+        print(df)
+
         word_data.append((df,image))
 
     corrections = attempt_spellcheck_on_volume(unchecked_words)
@@ -110,8 +113,8 @@ def attempt_spellcheck_on_volume(words):
 
     spell.word_frequency.load_words(safewords)
 
-    # Problematic word :P
-    spell.word_frequency.remove_words(['geiss'])
+    # Problematic words :P
+    spell.word_frequency.remove_words(['geiss','shoulder','shoulders'])
         
     # Problem with analysing reports with alot of photos, needs more preprocessing ! 
     # print(words)
