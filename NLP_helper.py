@@ -41,6 +41,9 @@ def find_boulder_from_paragraph(match):
 
     extra = None
 
+    rt_dict = {}
+    siz_pos = {}
+
     for flair_sentence in sentences:
         
         # predict NER and POS tags
@@ -100,31 +103,38 @@ def find_boulder_from_paragraph(match):
                     aut_dict[aut] = tup
 
         # Run find size to search the sentence for the size of the boulder
-        if size is None:
-            siz_pos, size = find_size(flair_sentence,flair_sentence.to_original_text()) 
-            
-            # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
-            if size:
-                if "l" in siz_pos:
-                    siz_pos["l"] = (siz_pos["l"][0]+sentence_length,siz_pos["l"][1]+sentence_length)
+        
+        can_siz_pos, can_size = find_size(flair_sentence,flair_sentence.to_original_text()) 
 
-                if "b" in siz_pos:
-                    siz_pos["b"] = (siz_pos["b"][0]+sentence_length,siz_pos["b"][1]+sentence_length)
+        if size is None:    
+            size = can_size
 
-                if "h" in siz_pos:
-                    siz_pos["h"] = (siz_pos["h"][0]+sentence_length,siz_pos["h"][1]+sentence_length)
-
-                if "x" in siz_pos:
-                    siz_pos["x"] = (siz_pos["x"][0]+sentence_length,siz_pos["x"][1]+sentence_length)
+        # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
+        if can_siz_pos:
+            for siz in can_siz_pos:
+                siz_pos[siz] = (can_siz_pos[siz][0]+sentence_length,can_siz_pos[siz][1]+sentence_length)
 
         # Run find rocktype to search the sentence for the rocktype of the boulder. 
+        
+        can_rts, can_rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
+
         if rocktype is None:
-            rt_dict, rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
-            if rt_dict:
-                for rt in rt_dict:
-                    tup = rt_dict[rt]
-                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
-                    rt_dict[rt] = tup
+            rocktype = can_rocktype
+
+        if can_rts:
+            for rt in can_rts:
+                rt_hl_array = []
+            
+                for j, word in match.iterrows():
+                    if rt.casefold() in word['text'].casefold():
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        rt_hl_array.append(box)
+                
+                if rt in rt_dict:
+                    rt_dict[rt].extend(rt_hl_array)
+                else:
+                    rt_dict[rt] = rt_hl_array
+      
 
         firstsentence = False
         # # If we have all features stop searching 
@@ -132,7 +142,8 @@ def find_boulder_from_paragraph(match):
         #     break
 
         sentence_length += len(flair_sentence.to_original_text())
-
+    
+    
     return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra
 
 
@@ -449,22 +460,20 @@ with open('./dictionaries/rocktypes.txt', 'r') as f:
 
 def find_rocktype(flair_sentence, sentence):
 
-    rt_dict = {}
+    rts = []
     rt = ""
     first = True
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
             if word.casefold() in rocktypes:
-                # print(word)
-                index = sentence.casefold().find(word.casefold())
-                # print(index)
                 if first:
                     rt = word
                     first = False
-                if not(word in rt_dict):
-                    rt_dict[word] = (index,index + len(word))
-    if rt_dict:
-        return rt_dict, rt
+            
+                if not (word in rts):
+                    rts.append(word)
+    if rts:
+        return rts, rt
     else:
         return None, None
 

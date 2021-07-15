@@ -267,13 +267,18 @@ def get_boulders(word_data):
 
                     if rt_pos:
                         for dim in rt_pos:
-                            if rt_char_count >= rt_pos[dim][0] and rt_char_count <= rt_pos[dim][1]:       
-                                (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                                    
+                            for (x,y,w,h) in rt_pos[dim]:
                                 cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
                                 rt_bound.append((x,y,x+w,y+h))
 
-                        rt_char_count += len(word['text']) + 1
+
+                            
+                            
+                            #     if rt_char_count >= hl[0] and rt_char_count <= hl[1]:       
+                            #         (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
+                                        
+                                    
+                            # rt_char_count += len(word['text']) + 1
 
                 if not location and len(locations) and page_number == page_numbers[len(page_numbers) - 1]:
                     location = locations[len(locations) - 1]

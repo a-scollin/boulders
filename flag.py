@@ -152,6 +152,9 @@ class VerfScreen(Screen):
                     highlight_amount = 1 
                 elif element[3] == 'NOT VERIFIED':
                     continue
+                
+                # TODO Don't leave NOT VERIFIED have no attributes highlighted, just 
+                # don't highlight the bounding box 
 
                 x,y,x_w,y_h = boulder['FullBB']
 
