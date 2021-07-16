@@ -43,7 +43,9 @@ def find_boulder_from_paragraph(match):
 
     rt_dict = {}
     siz_pos = {}
-
+    aut_dict = {}   
+    loc_dict = {}
+    extra_dict = {}
     for flair_sentence in sentences:
         
         # predict NER and POS tags
@@ -55,52 +57,106 @@ def find_boulder_from_paragraph(match):
 
                 numberofboulders = find_number(flair_sentence)
 
-        if extra is None:
-
-            extra_dict, extra = find_extra(flair_sentence,flair_sentence.to_original_text())
-
-            if extra_dict:
-                for ext in extra_dict:
-                    tup = extra_dict[ext] 
-                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
-                    extra_dict[ext] = tup
         
-        else:
 
-            ext_dict, ext_string = find_extra(flair_sentence, flair_sentence.to_original_text())
+        can_extra_dict, can_extra = find_extra(flair_sentence,flair_sentence.to_original_text())
 
-            if ext_dict:
-                for ext in ext_dict:
-                    if ext not in extra_dict:
-                        tup = ext_dict[ext] 
-                        tup = (tup[0]+sentence_length, tup[1]+sentence_length)
-                        extra_dict[ext] = tup
-                        extra += ' - ' + str(ext)
+        if extra is None and can_extra:
+            extra = can_extra
+
+        if can_extra_dict:
+            for ext in can_extra_dict:
+                ext_hl_array = []
+                for j, word in match.iterrows():
+                    if ext.casefold() in word['text'].casefold():
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        ext_hl_array.append(box)
+        
+                if ext in extra_dict:
+                    extra_dict[ext].extend(ext_hl_array)
+                else:
+                    extra_dict[ext] = ext_hl_array
 
 
         # Run find location to search the sentence for the location of the boulder. 
-        if location is None:
-            # TODO find_Location has all locations not dealt with properly... also redo all of the find from paragraph function for rating .. 
-            loc_dict, location = find_location(flair_sentence,match)
-            # Get accurate position of the location in whole paragraph
-            
-            
+       
+        # TODO find_Location has all locations not dealt with properly... also redo all of the find from paragraph function for rating .. 
+        can_loc_dict, can_location = find_location(flair_sentence,match)
+        # Get accurate position of the location in whole paragraph
 
-            if loc_dict:
-                for loc in loc_dict:
-                    tup = loc_dict[loc] 
-                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
-                    loc_dict[loc] = tup
+        if location is None and can_location:
+            location = can_location
         
-        if author is None:
+        if can_loc_dict:
+            
+            for loc in can_loc_dict:
+                loc_hl_array = []
+                for j, word in match.iterrows():
+                    if loc in word['text']:
+                        if not loc[0].isupper() and len(loc) < 4:
+                            continue
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        loc_hl_array.append(box)
+                                
+                if loc in loc_dict:
+                    loc_dict[loc].extend(loc_hl_array)
+                else:
+                    loc_dict[loc] = loc_hl_array
+        
+        
+        openquote = False
+        can_loc_box = []
+        can_location = ""
+        for j, word in match.iterrows():
+            if '“' in word['text'] and not openquote:
+                can_location = word['text']
+                can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
+                openquote = True
+            elif ('”' in word['text'] and openquote):
+                can_location += " " + word['text']
+                can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
+                openquote = False
+                location += ' - ' + can_location 
+                
+                if can_location in loc_dict:
+                    loc_dict[can_location].extend(can_loc_box)
+                else:
+                    loc_dict[can_location] = can_loc_box
+                
+                can_loc_box = []
+            elif openquote:
+                if len(can_location) < 3:
+                    can_location += word['text']    
+                else:
+                    can_location += " " + word['text']
+                can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
+            elif len(can_location) > 30 and openquote:
+                openquote = False
 
-            aut_dict, author = find_author(flair_sentence)
 
-            if aut_dict:
-                for aut in aut_dict:
-                    tup = aut_dict[aut] 
-                    tup = (tup[0]+sentence_length, tup[1]+sentence_length)
-                    aut_dict[aut] = tup
+
+                        
+        can_aut_dict, can_author = find_author(flair_sentence)
+
+        if author is None and can_author:
+            author = can_author
+
+        if can_aut_dict:
+            
+            for aut in can_aut_dict:
+                if len(aut) < 4:
+                    continue
+                aut_hl_array = []
+                for j, word in match.iterrows():
+                    if aut.casefold() in word['text'].casefold():
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        aut_hl_array.append(box)
+                
+                if aut in aut_dict:
+                    aut_dict[aut].extend(aut_hl_array)
+                else:
+                    aut_dict[aut] = aut_hl_array
+
 
         # Run find size to search the sentence for the size of the boulder
         
@@ -118,7 +174,7 @@ def find_boulder_from_paragraph(match):
         
         can_rts, can_rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
 
-        if rocktype is None:
+        if rocktype is None and can_rocktype:
             rocktype = can_rocktype
 
         if can_rts:
@@ -142,8 +198,6 @@ def find_boulder_from_paragraph(match):
         #     break
 
         sentence_length += len(flair_sentence.to_original_text())
-    
-    
     return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra
 
 
@@ -156,24 +210,32 @@ with open('./dictionaries/extra.txt', 'r') as f:
                 word += char
         if len(word):
             ext_features.append(word)          
+    
+print(ext_features)
 
 def find_extra(flair_sentence, sentence):
-    ext_dict = {}
+    exts = []
     extra = ""
     first = True
+
+    
+    
     if any(ext.casefold() in sentence.casefold() for ext in ext_features):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
             if word.casefold() in ext_features:
-                # print(word)
-                index = sentence.casefold().find(word.casefold())
-                # print(index)
-                if first:
+               
+                if len(extra):
+                    extra += ' - ' + word
+                else:
                     extra = word
-                    first = False
-                if not(word in ext_dict):
-                    ext_dict[word] = (index,index + len(word))
-    if ext_dict:
-        return ext_dict, extra
+
+                if word not in exts:
+                    exts.append(word)         
+                
+    if exts:
+        print("EXTRAS:")
+        print(exts)
+        return exts, extra
     else:
         return None, None
 
@@ -194,45 +256,57 @@ def find_number(flair_sentence):
 # Currently Hard coded for report 1 
 def find_author(flair_sentence):
 
-    brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
 
     author = None 
 
-    aut_dict = {}
+    auts = []
 
-    for bracket in brackets:
-        if "Report".casefold() in bracket.casefold():
+    for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
+        for label in entity['labels']:
+            if "PER" in label.value:
+                if author:
+                    author += ", " + entity['text']
+                else:
+                    author = entity["text"]
+
+                auts.extend(entity['text'].split(' '))
+                
+                
+
+    # brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
+    # for bracket in brackets:
+    #     if "Report".casefold() in bracket.casefold():
             
-            if len(bracket) > 100:
-                continue
+    #         if len(bracket) > 100:
+    #             continue
 
-            author = bracket
+    #         author = bracket
 
-            index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
+    #         index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
 
-            aut_dict[author] = (index, index + len(bracket))
+    #         aut_dict[author] = (index, index + len(bracket))
 
-            return aut_dict, author
+    #         return aut_dict, author
 
-        else:
+    #     else:
 
-            index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
-            fsentence = Sentence(bracket)
-            tagger.predict(fsentence)
-            for entity in fsentence.to_dict(tag_type='ner')['entities']:
-                for label in entity['labels']:
-                    if "PER" in label.value:
+    #         index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
+    #         fsentence = Sentence(bracket)
+    #         tagger.predict(fsentence)
+    #         for entity in fsentence.to_dict(tag_type='ner')['entities']:
+    #             for label in entity['labels']:
+    #                 if "PER" in label.value:
 
-                        if author:
-                            author += ", " + entity['text']
-                        else:
-                            author = entity["text"]
+    #                     if author:
+    #                         author += ", " + entity['text']
+    #                     else:
+    #                         author = entity["text"]
                         
-                        if not (entity["text"] in aut_dict):
-                            aut_dict[entity["text"]] = (index+entity["start_pos"],index+entity["end_pos"])
+    #                     if not (entity["text"] in aut_dict):
+    #                         aut_dict[entity["text"]] = (index+entity["start_pos"],index+entity["end_pos"])
 
-    if aut_dict:
-        return aut_dict, author  
+    if auts:
+        return auts, author  
     else:
         return None, None
 
@@ -483,7 +557,7 @@ def find_rocktype(flair_sentence, sentence):
 
 def find_location(flair_sentence,match):    
     location = ''    
-    loc_dict = {}
+    locs = []
 
     # Manual override for first report as the text orientation is consistent
     if False:
@@ -496,21 +570,25 @@ def find_location(flair_sentence,match):
             senlen += len(word[1]['text'])
     
         location = location.split(".—")[0]
+    
+
 
     first = True
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
         for label in entity["labels"]:
             if "LOC" in label.value:
-
+                
                 if first:
-                    location += " - " + entity["text"]
+                    location = entity["text"]
                     first = False
+                elif entity['text'] not in location:
+                    location += " - " + entity["text"]
+                    
+                locs.extend(entity['text'].split(' '))
+        
 
-                if not (entity["text"] in loc_dict):
-                    loc_dict[entity["text"]] = (entity["start_pos"],entity["end_pos"])
-
-    if loc_dict:
-        return loc_dict, location  
+    if locs:
+        return locs, location  
     else:
         return None, None
 
