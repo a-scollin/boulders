@@ -364,7 +364,12 @@ def find_dims(flair_sentence,sentence):
         for entity in flair_sentence.to_dict(tag_type='pos')['entities']:
 
             if entity['text'].casefold() in dimensions:
+                
+                if dim and entity['text'] == 'above':
+                    continue
+
                 dim = entity['text']
+
 
                 
             
@@ -388,6 +393,9 @@ def find_dims(flair_sentence,sentence):
 
                         continue
 
+                if dim == "above":
+                    dim = None
+                    continue
 
                 if size:
                     size += ", " + dim + " : " + number 
