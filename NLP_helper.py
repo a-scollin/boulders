@@ -33,6 +33,8 @@ def find_boulder_from_paragraph(match):
 
     author = None
 
+    dims = None
+
     numberofboulders = None
 
     sentence_length = 0
@@ -45,6 +47,7 @@ def find_boulder_from_paragraph(match):
     siz_pos = {}
     aut_dict = {}   
     loc_dict = {}
+    dim_dict = {}
     extra_dict = {}
     for flair_sentence in sentences:
         
@@ -76,6 +79,24 @@ def find_boulder_from_paragraph(match):
                     extra_dict[ext].extend(ext_hl_array)
                 else:
                     extra_dict[ext] = ext_hl_array
+
+        can_dim_dict, can_dims = find_dims(flair_sentence,flair_sentence.to_original_text())
+
+        if dims is None and can_dims:
+            dims = can_dims
+
+        if can_dim_dict:
+            for dim in can_dim_dict:
+                dim_hl_array = []
+                for j, word in match.iterrows():
+                    if dim.casefold() in word['text'].casefold():
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        dim_hl_array.append(box)
+        
+                if dim in dim_dict:
+                    dim_dict[dim].extend(dim_hl_array)
+                else:
+                    dim_dict[dim] = dim_hl_array
 
 
         # Run find location to search the sentence for the location of the boulder. 
@@ -198,7 +219,7 @@ def find_boulder_from_paragraph(match):
         #     break
 
         sentence_length += len(flair_sentence.to_original_text())
-    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra, dim_dict, dims
 
 
 ext_features = []
@@ -211,7 +232,6 @@ with open('./dictionaries/extra.txt', 'r') as f:
         if len(word):
             ext_features.append(word)          
     
-print(ext_features)
 
 def find_extra(flair_sentence, sentence):
     exts = []
@@ -233,8 +253,7 @@ def find_extra(flair_sentence, sentence):
                     exts.append(word)         
                 
     if exts:
-        print("EXTRAS:")
-        print(exts)
+       
         return exts, extra
     else:
         return None, None
@@ -310,7 +329,88 @@ def find_author(flair_sentence):
     else:
         return None, None
 
+
+dimensions = []
+with open('./dictionaries/dimensions.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            dimensions.append(word)          
+
+metrics = []
+with open('./dictionaries/metrics.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            metrics.append(word)      
+
 # This function analyses a sentence to extract size information relating to height and width 
+
+def find_dims(flair_sentence,sentence):
+    
+        # Needs a bit more work! none type error so far... :/ TODO 16/07
+    dims = []
+    size = None
+#  if dimension != 'above' could be the play
+    if any(dimension in sentence for dimension in dimensions):
+        number = None
+        dim = None
+        for entity in flair_sentence.to_dict(tag_type='pos')['entities']:
+
+            if entity['text'].casefold() in dimensions:
+                dim = entity['text']
+
+                
+            
+            for label in entity["labels"]:
+                if "CD" in label.value:
+                    if any(metric in sentence[entity['start_pos']-5:entity['end_pos']+10] for metric in metrics if metric != "miles" and metric != "yards"):
+                        number = entity['text']
+            
+            if dim and number:
+                if "high" in dim or "height" in dim or "above" in dim:
+                    try:
+                        if "sea" in sentence[entity['start_pos']-5:entity['end_pos']+20] or w2n.word_to_num(number) > 100:
+                            if dim not in dims:
+                                dims.append(dim)
+                            dim = 'height above sea level'
+                    except:
+                        
+                        print("Nan : " + number)
+                    
+                        number = None
+
+                        continue
+
+
+                if size:
+                    size += ", " + dim + " : " + number 
+                else:
+                    size = dim + " : " + number 
+
+                if dim not in dims:
+                    dims.extend(dim.split(' '))
+                
+                if number not in dims:
+                    dims.append(number)
+
+                number = None
+                dim = None
+       
+
+    if dims:
+        print(sentence)
+        print("DIMS : " + str(list(dict.fromkeys(dims))))
+        print("SIZE : " + str(size))
+        return list(dict.fromkeys(dims)), size
+    else:
+        return None, None
 
 def find_size(flair_sentence,sentence):
 
@@ -340,182 +440,189 @@ def find_size(flair_sentence,sentence):
 
         return siz_dict, sizes            
 
-    else: 
-    # If not, then check for length and breadth keywords.. not checking specifically for height because height is mentioned alot when desribing boulder locality
-        if "breadth".casefold() in sentence.casefold() or "length".casefold() in sentence.casefold() or "width".casefold() in sentence.casefold():
-            spans = flair_sentence.get_spans('pos')
-            breadth, length, height = None, None, None
-            breadth_index, length_index, height_index = None, None, None
+    
 
-            # Each word is searched in a span outwords and the first cardinal number found near the breadth or length or width.. that number is assigned to the breadth, length ..
-            for i in range(0,len(spans)):
-                if (spans[i].text.casefold() == "breadth".casefold() or spans[i].text.casefold() == "width".casefold()) and not breadth:
+    return None, None 
+        
+        
+        
+        
+        
+            # # If not, then check for length and breadth keywords.. not checking specifically for height because height is mentioned alot when desribing boulder locality
+    #     if "breadth".casefold() in sentence.casefold() or "length".casefold() in sentence.casefold() or "width".casefold() in sentence.casefold():
+    #         spans = flair_sentence.get_spans('pos')
+    #         breadth, length, height = None, None, None
+    #         breadth_index, length_index, height_index = None, None, None
+
+    #         # Each word is searched in a span outwords and the first cardinal number found near the breadth or length or width.. that number is assigned to the breadth, length ..
+    #         for i in range(0,len(spans)):
+    #             if (spans[i].text.casefold() == "breadth".casefold() or spans[i].text.casefold() == "width".casefold()) and not breadth:
                     
-                    span_counter = 0    
-                    j = i
-                    k = i 
-                    while not breadth and (j > 0 or k < len(spans) - 1):           
+    #                 span_counter = 0    
+    #                 j = i
+    #                 k = i 
+    #                 while not breadth and (j > 0 or k < len(spans) - 1):           
                         
-                        if span_counter:
-                            span_counter += 1 
-                            if span_counter > 8:
-                                breadth = spans[span_index].text
-                                breadth_index = span_index
-                                break
+    #                     if span_counter:
+    #                         span_counter += 1 
+    #                         if span_counter > 8:
+    #                             breadth = spans[span_index].text
+    #                             breadth_index = span_index
+    #                             break
                         
-                        if j > 0:
-                            j -= 1
-                        if k < len(spans) - 1:
-                            k += 1 
-                        for label in spans[j].labels:    
-                            if "CD" in label.value:
+    #                     if j > 0:
+    #                         j -= 1
+    #                     if k < len(spans) - 1:
+    #                         k += 1 
+    #                     for label in spans[j].labels:    
+    #                         if "CD" in label.value:
                                 
-                                if (j != length_index and j != height_index and spans[j].text.isnumeric()):
-                                    breadth = spans[j].text
-                                    breadth_index = j
+    #                             if (j != length_index and j != height_index and spans[j].text.isnumeric()):
+    #                                 breadth = spans[j].text
+    #                                 breadth_index = j
                                 
                                 
-                                if span_counter == 0:
-                                    if (j == length_index or j == height_index) and breadth is None:
-                                        span_index = j
-                                        span_counter = 1 
+    #                             if span_counter == 0:
+    #                                 if (j == length_index or j == height_index) and breadth is None:
+    #                                     span_index = j
+    #                                     span_counter = 1 
 
                                     
-                        if not breadth:
-                            for label in spans[k].labels:
-                                if "CD" in label.value:
-                                    if k != length_index and k != height_index and spans[k].text.isnumeric():
+    #                     if not breadth:
+    #                         for label in spans[k].labels:
+    #                             if "CD" in label.value:
+    #                                 if k != length_index and k != height_index and spans[k].text.isnumeric():
                                      
                                         
-                                        breadth = spans[k].text 
-                                        breadth_index = k  
+    #                                     breadth = spans[k].text 
+    #                                     breadth_index = k  
 
-                                    if span_counter == 0:
-                                        if (j == length_index or j == height_index) and breadth is None:
-                                            span_index = j
-                                            span_counter = 1 
+    #                                 if span_counter == 0:
+    #                                     if (j == length_index or j == height_index) and breadth is None:
+    #                                         span_index = j
+    #                                         span_counter = 1 
                 
                 
-                if spans[i].text.casefold() == "length".casefold() and not length:
+    #             if spans[i].text.casefold() == "length".casefold() and not length:
                     
-                    span_counter = 0    
-                    j = i
-                    k = i 
-                    while not length and (j > 0 or k < len(spans) - 1):           
+    #                 span_counter = 0    
+    #                 j = i
+    #                 k = i 
+    #                 while not length and (j > 0 or k < len(spans) - 1):           
                         
-                        if span_counter:
-                            span_counter += 1 
-                            if span_counter > 6:
-                                length = spans[span_index].text
-                                breadth_index = span_index
-                                break
+    #                     if span_counter:
+    #                         span_counter += 1 
+    #                         if span_counter > 6:
+    #                             length = spans[span_index].text
+    #                             breadth_index = span_index
+    #                             break
                         
-                        if j > 0:
-                            j -= 1
-                        if k < len(spans) - 1:
-                            k += 1 
-                        for label in spans[j].labels:    
-                            if "CD" in label.value:
+    #                     if j > 0:
+    #                         j -= 1
+    #                     if k < len(spans) - 1:
+    #                         k += 1 
+    #                     for label in spans[j].labels:    
+    #                         if "CD" in label.value:
                              
-                                if (j != breadth_index and j != height_index and spans[j].text.isnumeric()):
-                                    length = spans[j].text
-                                    breadth_index = j
+    #                             if (j != breadth_index and j != height_index and spans[j].text.isnumeric()):
+    #                                 length = spans[j].text
+    #                                 breadth_index = j
                             
-                                if span_counter == 0:
-                                    if (j == breadth_index or j == height_index) and length is None:
+    #                             if span_counter == 0:
+    #                                 if (j == breadth_index or j == height_index) and length is None:
                                         
-                                        span_index = j
-                                        span_counter = 1 
+    #                                     span_index = j
+    #                                     span_counter = 1 
 
                                     
-                        if not length:
-                            for label in spans[k].labels:
-                                if "CD" in label.value:
-                                    if k != breadth_index and k != height_index and spans[k].text.isnumeric():
+    #                     if not length:
+    #                         for label in spans[k].labels:
+    #                             if "CD" in label.value:
+    #                                 if k != breadth_index and k != height_index and spans[k].text.isnumeric():
                                
                                         
-                                        length = spans[k].text 
-                                        breadth_index = k  
+    #                                     length = spans[k].text 
+    #                                     breadth_index = k  
 
-                                    if span_counter == 0:
-                                        if (j == breadth_index or j == height_index) and length is None:
+    #                                 if span_counter == 0:
+    #                                     if (j == breadth_index or j == height_index) and length is None:
                                             
-                                            span_index = j
-                                            span_counter = 1 
+    #                                         span_index = j
+    #                                         span_counter = 1 
 
-                if spans[i].text.casefold() == "height".casefold() and not height:
+    #             if spans[i].text.casefold() == "height".casefold() and not height:
                     
-                    span_counter = 0    
-                    j = i
-                    k = i 
-                    while not height and (j > 0 or k < len(spans) - 1):           
+    #                 span_counter = 0    
+    #                 j = i
+    #                 k = i 
+    #                 while not height and (j > 0 or k < len(spans) - 1):           
                         
-                        if span_counter:
-                            span_counter += 1 
+    #                     if span_counter:
+    #                         span_counter += 1 
              
-                            if span_counter > 6:
-                                height = spans[span_index].text
-                                breadth_index = span_index
-                                break
+    #                         if span_counter > 6:
+    #                             height = spans[span_index].text
+    #                             breadth_index = span_index
+    #                             break
                         
-                        if j > 0:
-                            j -= 1
-                        if k < len(spans) - 1:
-                            k += 1 
-                        for label in spans[j].labels:    
-                            if "CD" in label.value:
+    #                     if j > 0:
+    #                         j -= 1
+    #                     if k < len(spans) - 1:
+    #                         k += 1 
+    #                     for label in spans[j].labels:    
+    #                         if "CD" in label.value:
                                
-                                if (j != breadth_index and j != length_index and spans[j].text.isnumeric()):
-                                    height = spans[j].text
-                                    breadth_index = j
+    #                             if (j != breadth_index and j != length_index and spans[j].text.isnumeric()):
+    #                                 height = spans[j].text
+    #                                 breadth_index = j
                                 
                                
-                                if span_counter == 0:
-                                    if (j == breadth_index or j == length_index) and height is None:
+    #                             if span_counter == 0:
+    #                                 if (j == breadth_index or j == length_index) and height is None:
                                     
-                                        span_index = j
-                                        span_counter = 1 
+    #                                     span_index = j
+    #                                     span_counter = 1 
 
                                     
-                        if not height:
-                            for label in spans[k].labels:
-                                if "CD" in label.value:
-                                    if k != breadth_index and k != length_index and spans[k].text.isnumeric():
+    #                     if not height:
+    #                         for label in spans[k].labels:
+    #                             if "CD" in label.value:
+    #                                 if k != breadth_index and k != length_index and spans[k].text.isnumeric():
                                
                                         
-                                        height = spans[k].text 
-                                        breadth_index = k  
+    #                                     height = spans[k].text 
+    #                                     breadth_index = k  
 
-                                    if span_counter == 0:
-                                        if (j == breadth_index or j == length_index) and height is None:
+    #                                 if span_counter == 0:
+    #                                     if (j == breadth_index or j == length_index) and height is None:
                                             
-                                            span_index = j
-                                            span_counter = 1 
+    #                                         span_index = j
+    #                                         span_counter = 1 
                 
 
 
-            # TODO: Only uses the key words location right now needs to be more accurate showing the number it associates with the dimension aswell.. 
+    #         # TODO: Only uses the key words location right now needs to be more accurate showing the number it associates with the dimension aswell.. 
                  
-            l1, l2 = sentence.casefold().find("length"),sentence.casefold().find("length") + 6
-            b1, b2 = sentence.casefold().find("breadth"),sentence.casefold().find("breadth") + 7
-            if b1 == -1:
-                b1, b2 = sentence.casefold().find("width"),sentence.casefold().find("width") + 7
-            h1, h2 = sentence.casefold().find("height"),sentence.casefold().find("height") + 6
+    #         l1, l2 = sentence.casefold().find("length"),sentence.casefold().find("length") + 6
+    #         b1, b2 = sentence.casefold().find("breadth"),sentence.casefold().find("breadth") + 7
+    #         if b1 == -1:
+    #             b1, b2 = sentence.casefold().find("width"),sentence.casefold().find("width") + 7
+    #         h1, h2 = sentence.casefold().find("height"),sentence.casefold().find("height") + 6
 
-            siz_pos = {}
+    #         siz_pos = {}
 
-            if l1 != -1:
-                siz_pos["l"] = (l1,l2)
+    #         if l1 != -1:
+    #             siz_pos["l"] = (l1,l2)
 
-            if b1 != -1:
-                siz_pos["b"] = (b1,b2)
+    #         if b1 != -1:
+    #             siz_pos["b"] = (b1,b2)
     
-            if h1 != -1:
-                siz_pos["h"] = (h1,h2)
+    #         if h1 != -1:
+    #             siz_pos["h"] = (h1,h2)
 
-            return siz_pos,"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
+    #         return siz_pos,"Length :" + str(length) + " Breadth : " + str(breadth) + " Height : " + str(height)
         
-        return None, None
+    #     return None, None
 
 # This function analyses a sentence to extract the rock type mentioned 
 

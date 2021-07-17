@@ -1,0 +1,10 @@
+length
+long
+height
+high 
+above
+width
+wide 
+girth
+diameter
+circumference

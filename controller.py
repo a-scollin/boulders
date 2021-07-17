@@ -194,10 +194,9 @@ def get_boulders(word_data):
 
                 # Use paragraph where boulder search term was found for analysis
                 
-                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, extra_pos, extra = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, extra_pos, extra, dim_dict, dims = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
-                pd.set_option("display.max_rows", None, "display.max_columns", None)
-                print(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+                
 
                 
                 if len(general_location) and location:
@@ -211,6 +210,12 @@ def get_boulders(word_data):
                 rt_char_count = 0 
                 aut_char_count = 0
                 ext_char_count = 0
+
+                if dim_dict:
+                    for dim in dim_dict:
+                        for (x,y,w,h) in dim_dict[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (204, 0, 102), 5)
+                            loc_bound.append((x,y,x+w,y+h))
 
                 if loc_pos:
                     for dim in loc_pos:
@@ -334,6 +339,7 @@ def get_boulders(word_data):
 
 
         if print_page:
+            print(word_data[i][0])
             d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
             print(d)
             cv2.imshow("Page : " + str(page_number), img)
