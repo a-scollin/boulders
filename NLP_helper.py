@@ -11,6 +11,16 @@ from word2number import w2n
 # load the NER tagger
 tagger = MultiTagger.load(['pos','ner'])
 
+compass = []
+with open('./dictionaries/compass.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha() or char == '.' or char == ',':
+                word += char
+        if len(word):
+            compass.append(word)      
+
 
 # This function will extract information about singular boulder paragraphs (ie. a numbered paragraph that refers to a single boulder), returns the attributes found within the paragraph
 def find_boulder_from_paragraph(match):
@@ -39,7 +49,6 @@ def find_boulder_from_paragraph(match):
 
     sentence_length = 0
 
-    firstsentence = True
 
     extra = None
 
@@ -49,18 +58,23 @@ def find_boulder_from_paragraph(match):
     loc_dict = {}
     dim_dict = {}
     extra_dict = {}
+    comp_dict = {}
+    numbox = None
+
     for flair_sentence in sentences:
         
         # predict NER and POS tags
         tagger.predict(flair_sentence)
 
-        if firstsentence:
 
-            if numberofboulders is None:
+        if "boulders" in flair_sentence.to_original_text() and numberofboulders is None:
 
-                numberofboulders = find_number(flair_sentence)
+            numberstring, numberofboulders = find_number(flair_sentence)
 
-        
+            if numberstring:
+                for j, word in match.iterrows():
+                    if numberstring in word['text']:
+                        numbox = (word['left'], word['top'], word['width'], word['height'])
 
         can_extra_dict, can_extra = find_extra(flair_sentence,flair_sentence.to_original_text())
 
@@ -124,12 +138,23 @@ def find_boulder_from_paragraph(match):
                 else:
                     loc_dict[loc] = loc_hl_array
         
-        
+
+
+        for j, word in match.iterrows():
+            if word['text'] in compass:
+                if word['text'] in comp_dict:
+                    comp_dict[word['text']].append((word['left'], word['top'], word['width'], word['height']))
+                else:
+                    comp_dict[word['text']] = [(word['left'], word['top'], word['width'], word['height'])]
+
         openquote = False
         can_loc_box = []
         can_location = ""
         for j, word in match.iterrows():
-            if '“' in word['text'] and not openquote:
+
+            if len(can_location) > 30 and openquote:
+                openquote = False
+            elif '“' in word['text'] and not openquote:
                 can_location = word['text']
                 can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
                 openquote = True
@@ -151,8 +176,7 @@ def find_boulder_from_paragraph(match):
                 else:
                     can_location += " " + word['text']
                 can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
-            elif len(can_location) > 30 and openquote:
-                openquote = False
+            
 
 
 
@@ -213,13 +237,16 @@ def find_boulder_from_paragraph(match):
                     rt_dict[rt] = rt_hl_array
       
 
-        firstsentence = False
         # # If we have all features stop searching 
         # if size and location and rocktype:
         #     break
 
         sentence_length += len(flair_sentence.to_original_text())
-    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, extra_dict, extra, dim_dict, dims
+    
+    if numberofboulders is None:
+        numberofboulders = 1 
+
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, numbox, extra_dict, extra, dim_dict, dims, comp_dict
 
 
 ext_features = []
@@ -263,14 +290,16 @@ def find_extra(flair_sentence, sentence):
 def find_number(flair_sentence):
     for entity in flair_sentence.to_dict(tag_type='pos')['entities']:    
         for label in entity['labels']:
+            if "boulders" in entity['text']:
+                return None, None
             if "CD" in label.value:
                 if not entity['text'].strip().isnumeric() and entity['text'].strip().isalpha():
                     try:
                         ret = int(w2n.word_to_num(entity['text']))
-                        return ret
+                        return entity['text'], ret
                     except:
-                        return 1
-    return 1
+                        return None, None
+    return None, None
 
 # Currently Hard coded for report 1 
 def find_author(flair_sentence):
@@ -361,6 +390,7 @@ def find_dims(flair_sentence,sentence):
     if any(dimension in sentence for dimension in dimensions):
         number = None
         dim = None
+        met = None
         for entity in flair_sentence.to_dict(tag_type='pos')['entities']:
 
             if entity['text'].casefold() in dimensions:
@@ -369,16 +399,33 @@ def find_dims(flair_sentence,sentence):
                     continue
 
                 dim = entity['text']
-
-
                 
             
             for label in entity["labels"]:
                 if "CD" in label.value:
-                    if any(metric in sentence[entity['start_pos']-5:entity['end_pos']+10] for metric in metrics if metric != "miles" and metric != "yards"):
+                    if any(metric in sentence[entity['start_pos']-5:entity['end_pos']+12] for metric in metrics if metric != "miles" and metric != "yards"):
                         number = entity['text']
+                        met = None
+                        if any(sub.isnumeric() for sub in sentence[entity['start_pos']+len(entity['text']):entity['end_pos']+12].split(" ")):
+                            continue
+                        for metric in metrics:
+                            if metric in sentence[entity['start_pos']+len(entity['text']):entity['end_pos']+12]:
+                                if met: 
+                                    met += " " + metric 
+                                else:
+                                    met = metric
             
-            if dim and number:
+            if (dim and number and met) or (number and met):
+                
+                
+                if dim is None:
+                    if "cubic" in met:
+                        dim = "volume"
+                    elif "tons" in met:
+                        dim = "weight"
+                    else:
+                        continue
+
                 if "high" in dim or "height" in dim or "above" in dim:
                     try:
                         if "sea" in sentence[entity['start_pos']-5:entity['end_pos']+20] or w2n.word_to_num(number) > 100:
@@ -398,9 +445,9 @@ def find_dims(flair_sentence,sentence):
                     continue
 
                 if size:
-                    size += ", " + dim + " : " + number 
+                    size += ", " + dim + " : " + number + " " + met
                 else:
-                    size = dim + " : " + number 
+                    size = dim + " : " + number + " " + met
 
                 if dim not in dims:
                     dims.extend(dim.split(' '))
@@ -408,8 +455,12 @@ def find_dims(flair_sentence,sentence):
                 if number not in dims:
                     dims.append(number)
 
+                if met not in dims:
+                    dims.extend(met.split(' '))
+
                 number = None
                 dim = None
+                met = None
        
 
     if dims:
