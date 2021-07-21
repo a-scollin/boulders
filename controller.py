@@ -149,22 +149,20 @@ def get_boulders(word_data):
             
             # if the word is a boulder related search term, look for the boulders features! 
 
-            if getting_location or'.—' in row['text'] or ('-' in row['text'] and row['text'].split('-').pop().isupper()):
+            if '.—' in row['text']:
+                words = word_data[i][0][(word_data[i][0]['line_num'] == row['line_num']) & (word_data[i][0]['par_num'] == row['par_num']) & (word_data[i][0]['word_num'] <= row['word_num'])]['text'].tolist()
+                general_location = ''
+                for word in words:
+                    if len(general_location):
+                        general_location += " " + word 
+                    else:
+                        general_location = word
                 
-                if not getting_location:
-
-                    general_location = ""
-
-                    getting_location = True
+                general_location = general_location.split('.—')[0]
                 
-                if re.sub(r"[,.—;@#?!&$]+\ *", "", row['text']).isupper():
-                    general_location += row['text'] + " "
-                    continue
-                else:
-                    getting_location = False
 
 
-            if ("boulder" in row['text']):
+            if ("boulder" in row['text'] or "Boulder" in row['text']):
 
                 # for confidence down the line
                 # p_nums.append(row["par_num"])
@@ -200,7 +198,7 @@ def get_boulders(word_data):
 
                 
                 if len(general_location) and location:
-                    location = general_location + '-' + location 
+                    location = general_location + ' - ' + location 
 
                 
 
@@ -237,7 +235,7 @@ def get_boulders(word_data):
                 if extra_pos:
                         for dim in extra_pos:
                             for (x,y,w,h) in extra_pos[dim]:
-                                cv2.rectangle(img, (x, y), (x + w, y + h), (180,105,255), 5)
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (147,20,255), 5)
                                 extra_bound.append((x,y,x+w,y+h))
                 if loc_pos:
                     for dim in loc_pos:

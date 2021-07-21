@@ -11,7 +11,7 @@ import numpy as np
 # will include methods for training the OCR model once verification data is made 
 
 def read_image_to_df(image):
-    text = pytesseract.image_to_data(OCR_pre_process_image(image), output_type='data.frame')
+    text = pytesseract.image_to_data(OCR_pre_process_image(image), output_type='data.frame', config='--oem 2')
     
     return text[text.conf != -1]
 

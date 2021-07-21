@@ -1,0 +1,13 @@
+black
+white
+red
+reddish
+green
+greenish
+yellow
+blue
+pink
+gray
+brown
+orange
+purple

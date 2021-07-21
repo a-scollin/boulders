@@ -141,7 +141,13 @@ def find_boulder_from_paragraph(match):
 
 
         for j, word in match.iterrows():
-            if word['text'] in compass:
+            last_character = None
+            stripped_word = ""
+            for character in word['text'].replace(",", "."):
+                if character != last_character:
+                    stripped_word += character
+                last_character = character
+            if stripped_word in compass:
                 if word['text'] in comp_dict:
                     comp_dict[word['text']].append((word['left'], word['top'], word['width'], word['height']))
                 else:
@@ -154,7 +160,7 @@ def find_boulder_from_paragraph(match):
 
             if len(can_location) > 30 and openquote:
                 openquote = False
-            elif '“' in word['text'] and not openquote:
+            elif ('“' in word['text'] or '¢' in word['text'] or '*' in word['text']) and not openquote:
                 can_location = word['text']
                 can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
                 openquote = True
@@ -162,8 +168,12 @@ def find_boulder_from_paragraph(match):
                 can_location += " " + word['text']
                 can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
                 openquote = False
-                location += ' - ' + can_location 
                 
+                if location:
+                    location += ' - ' + can_location 
+                else:
+                    location = can_location
+                    
                 if can_location in loc_dict:
                     loc_dict[can_location].extend(can_loc_box)
                 else:
@@ -259,29 +269,44 @@ with open('./dictionaries/extra.txt', 'r') as f:
         if len(word):
             ext_features.append(word)          
     
+colours = []
+with open('./dictionaries/colours.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            colours.append(word)          
+    
 
 def find_extra(flair_sentence, sentence):
     exts = []
     extra = ""
     first = True
 
-    
+    lastword = None
     
     if any(ext.casefold() in sentence.casefold() for ext in ext_features):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
             if word.casefold() in ext_features:
                
-                if len(extra):
-                    extra += ' - ' + word
+                if lastword:
+                    ex_word = lastword + " " + word if lastword in colours else word
                 else:
-                    extra = word
-
-                if word not in exts:
-                    exts.append(word)         
+                    ex_word = word                
                 
-    if exts:
-       
-        return exts, extra
+                if len(extra):
+                    extra += ' - ' + ex_word
+                else:
+                    extra = ex_word
+
+                exts.extend(ex_word.split(' '))         
+            
+            lastword = word       
+    
+    if exts:   
+        return list(dict.fromkeys(exts)), extra
     else:
         return None, None
 
@@ -304,6 +329,26 @@ def find_number(flair_sentence):
 # Currently Hard coded for report 1 
 def find_author(flair_sentence):
 
+    if True:
+
+        author = None 
+
+        auts = []
+
+        brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
+        for bracket in brackets:
+            if "Report".casefold() in bracket.casefold():
+                
+                if len(bracket) > 100:
+                    continue
+
+                author = bracket
+
+                index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
+
+                auts.extend(bracket.split(' '))
+
+                return auts, author
 
     author = None 
 
@@ -321,20 +366,6 @@ def find_author(flair_sentence):
                 
                 
 
-    # brackets = re.findall('\(.*?\)|\(.*?-', flair_sentence.to_original_text())
-    # for bracket in brackets:
-    #     if "Report".casefold() in bracket.casefold():
-            
-    #         if len(bracket) > 100:
-    #             continue
-
-    #         author = bracket
-
-    #         index = flair_sentence.to_original_text().casefold().find(bracket.casefold())
-
-    #         aut_dict[author] = (index, index + len(bracket))
-
-    #         return aut_dict, author
 
     #     else:
 
@@ -416,8 +447,7 @@ def find_dims(flair_sentence,sentence):
                                     met = metric
             
             if (dim and number and met) or (number and met):
-                
-                
+        
                 if dim is None:
                     if "cubic" in met:
                         dim = "volume"
@@ -702,18 +732,28 @@ def find_rocktype(flair_sentence, sentence):
 
     rts = []
     rt = ""
-    first = True
+    lastword = None
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
+       
             if word.casefold() in rocktypes:
-                if first:
-                    rt = word
-                    first = False
+
+                if lastword:
+                    ex_word = lastword + " " + word if lastword in colours else word
+                else:   
+                    ex_word = word
+                
+                if len(rt):
+                    rt += ", " + ex_word
+                else:
+                    rt = ex_word
             
-                if not (word in rts):
-                    rts.append(word)
+                rts.extend(ex_word.split(" "))
+
+            lastword = word
+
     if rts:
-        return rts, rt
+        return list(dict.fromkeys(rts)), rt
     else:
         return None, None
 
@@ -737,16 +777,22 @@ def find_location(flair_sentence,match):
     
         location = location.split(".—")[0]
     
+    if False:
+        for j, word in match.iterrows():
+            if '.—' in word['text'] and word['text'][0].isupper():
+                location = word['text'].split('.—')[0]
+                locs.append(word['text'])
+                break
 
 
-    first = True
+
+    
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
         for label in entity["labels"]:
             if "LOC" in label.value:
                 
-                if first:
-                    location = entity["text"]
-                    first = False
+                if not len(location):
+                    location = entity["text"] 
                 elif entity['text'] not in location:
                     location += " - " + entity["text"]
                     
