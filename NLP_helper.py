@@ -22,6 +22,17 @@ with open('./dictionaries/compass.txt', 'r') as f:
             compass.append(word)      
 
 
+colours = []
+with open('./dictionaries/colours.txt', 'r') as f:
+    for line in f:
+        word = ""
+        for char in line:
+            if char.isalpha():
+                word += char
+        if len(word):
+            colours.append(word)          
+    
+
 # This function will extract information about singular boulder paragraphs (ie. a numbered paragraph that refers to a single boulder), returns the attributes found within the paragraph
 def find_boulder_from_paragraph(match):
   
@@ -47,9 +58,17 @@ def find_boulder_from_paragraph(match):
 
     numberofboulders = None
 
-    sentence_length = 0
-
     extra = None
+
+    weight = None 
+
+    volume = None
+
+    distance = None
+
+    hasl = None
+
+    sentence_length = 0
 
     rt_dict = {}
     siz_pos = {}
@@ -66,35 +85,13 @@ def find_boulder_from_paragraph(match):
         tagger.predict(flair_sentence)
 
 
-        if ("Boulders" in flair_sentence.to_original_text() or "boulders" in flair_sentence.to_original_text()) and numberofboulders is None:
-
+        if ("Boulders" in flair_sentence.to_original_text() or "boulders" in flair_sentence.to_original_text() or "Block" in flair_sentence.to_original_text() or "block" in flair_sentence.to_original_text()) and numberofboulders is None:
             numberstring, numberofboulders = find_number(flair_sentence)
 
             if numberstring:
                 for j, word in match.iterrows():
                     if numberstring in word['text']:
                         numbox = (word['left'], word['top'], word['width'], word['height'])
-
-        can_extra_dict, can_extra = find_extra(flair_sentence,flair_sentence.to_original_text())
-
-        if can_extra:
-            if extra:
-                extra += " - " + can_extra
-            else:
-                extra = can_extra
-
-        if can_extra_dict:
-            for ext in can_extra_dict:
-                ext_hl_array = []
-                for j, word in match.iterrows():
-                    if ext.casefold() in word['text'].casefold():
-                        box = (word['left'], word['top'], word['width'], word['height'])
-                        ext_hl_array.append(box)
-        
-                if ext in extra_dict:
-                    extra_dict[ext].extend(ext_hl_array)
-                else:
-                    extra_dict[ext] = ext_hl_array
 
         # Run find size to search the sentence for the size of the boulder of form L x B x H
         
@@ -106,17 +103,52 @@ def find_boulder_from_paragraph(match):
             else:
                 size = can_size
 
-        # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
+        # Get position of the size related features in the whole paragraph, This uses a different method to other features as the fractions
+        # used throughout report aren't picked up by the OCR which messes things up a bit. 
         if can_siz_pos:
             for siz in can_siz_pos:
                 siz_pos[siz] = (can_siz_pos[siz][0]+sentence_length,can_siz_pos[siz][1]+sentence_length)
 
-        # Get size
+        # Get the dimensions and numbers associated with them from the sentence, will be split into their different attributes
 
         can_dim_dict, can_dims = find_dims(flair_sentence,flair_sentence.to_original_text())
 
-        if dims is None and can_dims:
-            dims = can_dims
+        if can_dims: 
+            for dim in can_dims:
+                if "weight" in dim.casefold():
+                    if weight:
+                        weight += " - " + dim
+                    else:
+                        weight = dim
+                    continue
+            
+                if "volume" in dim.casefold():
+                    if volume:
+                        volume += " - " + dim
+                    else:
+                        volume = dim
+                    continue
+
+                if "sea" in dim.casefold():
+                    if hasl:
+                        hasl += " - " + dim
+                    else:
+                        hasl = dim
+                    continue
+
+                
+                if "miles" in dim.casefold() or "yards" in dim.casefold():
+                    if distance:
+                        distance += dim
+                    else:
+                        distance = dim 
+                    continue
+                else:
+                    # Else add to size
+                    if size:
+                        size += ' - ' + dim
+                    else:
+                        size = dim
 
         if can_dim_dict:
             for dim in can_dim_dict:
@@ -131,20 +163,16 @@ def find_boulder_from_paragraph(match):
                 else:
                     dim_dict[dim] = dim_hl_array
 
-        
-
-
         # Run find location to search the sentence for the location of the boulder. 
        
-        # TODO find_Location has all locations not dealt with properly... also redo all of the find from paragraph function for rating .. 
         can_loc_dict, can_location = find_location(flair_sentence,match)
-        # Get accurate position of the location in whole paragraph
+
+        # Just take first location found as there are so many..
 
         if location is None and can_location:
             location = can_location
         
         if can_loc_dict:
-            
             for loc in can_loc_dict:
                 loc_hl_array = []
                 for j, word in match.iterrows():
@@ -159,20 +187,7 @@ def find_boulder_from_paragraph(match):
                 else:
                     loc_dict[loc] = loc_hl_array
         
-
-
-        for j, word in match.iterrows():
-            last_character = None
-            stripped_word = ""
-            for character in word['text'].replace(",", "."):
-                if character != last_character:
-                    stripped_word += character
-                last_character = character
-            if stripped_word in compass:
-                if word['text'] in comp_dict:
-                    comp_dict[word['text']].append((word['left'], word['top'], word['width'], word['height']))
-                else:
-                    comp_dict[word['text']] = [(word['left'], word['top'], word['width'], word['height'])]
+        # Looking for locations that are mentioned within quotation marks ! 
 
         openquote = False
         can_loc_box = []
@@ -207,11 +222,25 @@ def find_boulder_from_paragraph(match):
                 else:
                     can_location += " " + word['text']
                 can_loc_box.append((word['left'], word['top'], word['width'], word['height']))
-            
+        
 
+        # Looking for compass directions.. 
 
+        for j, word in match.iterrows():
+            last_character = None
+            stripped_word = ""
+            for character in word['text'].replace(",", "."):
+                if character != last_character:
+                    stripped_word += character
+                last_character = character
+            if stripped_word in compass:
+                if word['text'] in comp_dict:
+                    comp_dict[word['text']].append((word['left'], word['top'], word['width'], word['height']))
+                else:
+                    comp_dict[word['text']] = [(word['left'], word['top'], word['width'], word['height'])]
+        
+        # Find author or citation reference 
 
-                        
         can_aut_dict, can_author = find_author(flair_sentence)
 
         if author is None and can_author:
@@ -233,17 +262,30 @@ def find_boulder_from_paragraph(match):
                 else:
                     aut_dict[aut] = aut_hl_array
 
+        # find the primary and secondary rocktypes in the sentence.. 
+        
+        can_rts = find_rocktype(flair_sentence,flair_sentence.to_original_text())
 
         
-
-        # Run find rocktype to search the sentence for the rocktype of the boulder. 
-        
-        can_rts, can_rocktype = find_rocktype(flair_sentence,flair_sentence.to_original_text())
-
-        if rocktype is None and can_rocktype:
-            rocktype = can_rocktype
-
+            
         if can_rts:
+            colour = None
+            for rt in can_rts:
+                if colour:
+                    the_rt = colour + " " + rt
+                    colour = None
+                elif rt in colours:
+                    colour = rt
+                    continue
+                else:
+                    the_rt = rt                                                 
+                
+                if rocktype:
+                    if the_rt not in rocktype:
+                        rocktype += ' - ' + the_rt
+                else:
+                    rocktype = the_rt
+
             for rt in can_rts:
                 rt_hl_array = []
             
@@ -256,18 +298,54 @@ def find_boulder_from_paragraph(match):
                     rt_dict[rt].extend(rt_hl_array)
                 else:
                     rt_dict[rt] = rt_hl_array
-      
+            
+        can_extra_dict = find_extra(flair_sentence,flair_sentence.to_original_text())
 
-        # # If we have all features stop searching 
-        # if size and location and rocktype:
-        #     break
+        if can_extra_dict:
+
+            colour = None
+            for ex in can_extra_dict:
+                if colour:
+                    the_extra = colour + " " + ex
+                    colour = None
+                elif ex in colours:
+                    colour = ex
+                    continue
+                else:
+                    the_extra = ex                                                 
+                
+                if extra:
+                    if the_extra not in extra:
+                        extra += ' - ' + the_extra
+                else:
+                    extra = the_extra
+
+            for ext in can_extra_dict:
+                ext_hl_array = []
+                for j, word in match.iterrows():
+                    if ext.casefold() in word['text'].casefold():
+                        box = (word['left'], word['top'], word['width'], word['height'])
+                        ext_hl_array.append(box)
+        
+                if ext in extra_dict:
+                    extra_dict[ext].extend(ext_hl_array)
+                else:
+                    extra_dict[ext] = ext_hl_array
+    
 
         sentence_length += len(flair_sentence.to_original_text())
     
+    compass_directions = ""
+    for direction in comp_dict:
+        if len(compass_directions):
+            compass_directions += " - " + direction 
+        else:
+            compass_directions = direction
+
     if numberofboulders is None:
         numberofboulders = 1 
 
-    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, numbox, extra_dict, extra, dim_dict, dims, comp_dict
+    return loc_dict, siz_pos, rt_dict, aut_dict, location, size, rocktype, author, numberofboulders, numbox, extra_dict, extra, dim_dict, volume, weight, hasl, distance, comp_dict, compass_directions
 
 
 ext_features = []
@@ -280,21 +358,10 @@ with open('./dictionaries/extra.txt', 'r') as f:
         if len(word):
             ext_features.append(word)          
     
-colours = []
-with open('./dictionaries/colours.txt', 'r') as f:
-    for line in f:
-        word = ""
-        for char in line:
-            if char.isalpha():
-                word += char
-        if len(word):
-            colours.append(word)          
-    
+
 
 def find_extra(flair_sentence, sentence):
     exts = []
-    extra = ""
-    first = True
 
     lastword = None
     
@@ -306,20 +373,15 @@ def find_extra(flair_sentence, sentence):
                     ex_word = lastword + " " + word if lastword in colours else word
                 else:
                     ex_word = word                
-                
-                if len(extra):
-                    extra += ' - ' + ex_word
-                else:
-                    extra = ex_word
 
                 exts.extend(ex_word.split(' '))         
             
             lastword = word       
     
     if exts:   
-        return list(dict.fromkeys(exts)), extra
+        return list(dict.fromkeys(exts))
     else:
-        return None, None
+        return None
 
 
 
@@ -427,7 +489,7 @@ def find_dims(flair_sentence,sentence):
     
         # Needs a bit more work! none type error so far... :/ TODO 16/07
     dims = []
-    size = None
+    size = []
 #  if dimension != 'above' could be the play
     if any(dimension in sentence for dimension in dimensions):
         number = None
@@ -442,7 +504,6 @@ def find_dims(flair_sentence,sentence):
 
                 dim = entity['text']
                 
-            
             for label in entity["labels"]:
                 if "CD" in label.value:
                     if any(metric in sentence[entity['start_pos']-5:entity['end_pos']+12] for metric in metrics if metric != "miles" and metric != "yards"):
@@ -484,11 +545,8 @@ def find_dims(flair_sentence,sentence):
                 if dim == "above":
                     dim = None
                     continue
-
-                if size:
-                    size += ", " + dim + " : " + number + " " + met
-                else:
-                    size = dim + " : " + number + " " + met
+                
+                size.append(dim + " : " + number + " " + met)    
 
                 if dim not in dims:
                     dims.extend(dim.split(' '))
@@ -505,9 +563,6 @@ def find_dims(flair_sentence,sentence):
        
 
     if dims:
-        print(sentence)
-        print("DIMS : " + str(list(dict.fromkeys(dims))))
-        print("SIZE : " + str(size))
         return list(dict.fromkeys(dims)), size
     else:
         return None, None
@@ -742,7 +797,6 @@ with open('./dictionaries/rocktypes.txt', 'r') as f:
 def find_rocktype(flair_sentence, sentence):
 
     rts = []
-    rt = ""
     lastword = None
     if any(rocktype.casefold() in sentence.casefold() for rocktype in rocktypes):
         for word in re.sub(r"[,.—;@#?!&$]+\ *", " ", sentence).split(" "):
@@ -753,20 +807,15 @@ def find_rocktype(flair_sentence, sentence):
                     ex_word = lastword + " " + word if lastword in colours else word
                 else:   
                     ex_word = word
-                
-                if len(rt):
-                    rt += ", " + ex_word
-                else:
-                    rt = ex_word
             
                 rts.extend(ex_word.split(" "))
 
             lastword = word
 
     if rts:
-        return list(dict.fromkeys(rts)), rt
+        return list(dict.fromkeys(rts))
     else:
-        return None, None
+        return None
 
 # This function analyses a sentence to extract the main location mentioned 
 

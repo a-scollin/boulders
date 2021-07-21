@@ -42,7 +42,7 @@ def review_vol(number):
         pickle.dump(word_data, f)
     
     # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
-    df = get_boulders(word_data)
+    df, df_for_saving = get_boulders(word_data)
 
     print("All done!")
 
@@ -54,12 +54,13 @@ def review_vol(number):
 
     # Saving output
 
-    if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
+    # if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
+    if True:
         with open('boulder_data' + str(number) + '.pickle', 'wb') as f:
             pickle.dump((word_data, df), f)
 
-    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
-        df.to_csv(input("Please enter filename"))
+    # if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
+        df_for_saving.to_csv("boulder_data" + str(number) + '.csv')
 
 
 
@@ -79,6 +80,16 @@ def get_boulders(word_data):
 
     extras = []
 
+    compass_directions = []
+
+    distances = []
+
+    volumes = []
+
+    weights = []
+
+    hasls = []
+
     array_numberofboulders = []
 
     page_numbers = []
@@ -94,6 +105,8 @@ def get_boulders(word_data):
     b_boundings = []
 
     aut_boundings = []
+
+    compass_boundings = []
 
     par_nums = []
 
@@ -156,8 +169,8 @@ def get_boulders(word_data):
 
 
             # if the word is a boulder related search term, look for the boulders features! 
-            if ("boulder" in row['text'] or "Boulder" in row['text']):
-
+            if ("boulder" in row['text'] or "Boulder" in row['text'] or "Block" in row['text'] or "block" in row['text']):
+ 
                 # for whole boulder phrase bounding box
 
                 least_x = 1000000
@@ -170,12 +183,13 @@ def get_boulders(word_data):
                 rt_bound = []
                 aut_bound = []
                 extra_bound = []
+                compass_bound = []
                 
                 siz_char_count = 0
 
                 # Use paragraph where boulder search term was found for analysis
                 
-                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, numbox, extra_pos, extra, dim_dict, dims, comp_dict = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, numbox, extra_pos, extra, dim_dict, volume, weight, hasl, distance, comp_dict, compass_direction = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
                 
                 if len(general_location) and location:
@@ -260,7 +274,7 @@ def get_boulders(word_data):
                     for dim in comp_dict:
                         for (x,y,w,h) in comp_dict[dim]:
                             cv2.rectangle(img, (x, y), (x + w, y + h), (200, 70, 10), 5)
-                            loc_bound.append((x,y,x+w,y+h))
+                            compass_bound.append((x,y,x+w,y+h))
 
                 
                 # If no location is found try setting the location to the last boulder on same pages location if not 
@@ -310,19 +324,28 @@ def get_boulders(word_data):
                     authors.append(author)
                     extras.append(extra)
                     array_numberofboulders.append(numberofboulders)
+                    
+                    compass_directions.append(compass_direction)
+                    distances.append(distance)
+
+                    volumes.append(volume)
+                    weights.append(weight)
+                    hasls.append(hasl)
                     aut_boundings.append(aut_bound)
                     page_numbers.append(page_number)
                     loc_boundings.append(loc_bound)
                     siz_boundings.append(siz_bound)
                     rt_boundings.append(rt_bound)
                     b_boundings.append(b_bound)
+                    compass_boundings.append(compass_bound)
+
                     extra_boundings.append(extra_bound)
                     full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
                     par_nums.append(row['par_num'])
 
         if print_page:
             print(word_data[i][0])
-            d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
+            d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Volume' : volumes, 'Weight' : weights, 'HASL' : hasls, 'Compass' : compass_directions, 'Distance' : distances, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'CBB' : compass_boundings, 'par_num' : par_nums}
             print(d)
             cv2.imshow("Page : " + str(page_number), img)
             cv2.waitKey(0)
@@ -331,12 +354,16 @@ def get_boulders(word_data):
 
         page_number += 1
  
-
-    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
-     
+    d_for_saving = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Volume' : volumes, 'Weight' : weights, 'Height above sea level' : hasls, 'Compass' : compass_directions, 'Distance' : distances, 'Number of Boulders mentioned' : array_numberofboulders, 'Extra' : extras, 'Author' : authors, 'Paragraph' : par_nums, 'Page' : page_numbers}
+    
+    df_for_saving = pd.DataFrame(data=d_for_saving)
+    
+    d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Volume' : volumes, 'Weight' : weights, 'HASL' : hasls, 'Compass' : compass_directions, 'Distance' : distances, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'CBB' : compass_boundings, 'par_num' : par_nums}     
+    
+    
     df = pd.DataFrame(data=d)
 
-    return df
+    return df, df_for_saving
 
 
 
@@ -417,7 +444,7 @@ elif len(sys.argv) == 3:
         word_data = pickle.load(f)
     
    
-    df = get_boulders(word_data)
+    df, df_for_saving = get_boulders(word_data)
 
     print("All done!")
 
@@ -425,12 +452,13 @@ elif len(sys.argv) == 3:
 
     print(df)
 
-    if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
-        with open('boulder_data.pickle', 'wb') as f:
+    # if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
+    if True:
+        with open('report10_data.pickle', 'wb') as f:
             pickle.dump((word_data, df), f)
 
-    if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
-        df.to_csv(input("Please enter filename"))
+    # if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
+        df_for_saving.to_csv("report10_noverf.csv")
 
 else:
 

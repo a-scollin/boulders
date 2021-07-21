@@ -47,6 +47,12 @@ class VerfScreen(Screen):
     current_bnum = StringProperty("")
     current_aut = StringProperty("")
     current_ext = StringProperty("")
+    current_volume = StringProperty("")
+    current_weight = StringProperty("")
+    current_hasl = StringProperty("")
+    current_compass = StringProperty("")
+    current_distance = StringProperty("")
+    current_par_num = StringProperty("")
     
     verf = StringProperty("")
     verf_colour = ColorProperty('yellow')
@@ -109,7 +115,7 @@ class VerfScreen(Screen):
     def export_csv(self,e):
         
         
-        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Rocktype' : [], 'Page_Number' : [], 'Extra' : [], 'BNum' : [], 'Author' : [], 'Verified' : []}
+        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Volume': [], 'Weight': [], 'HASL': [], 'Compass': [], 'Distance': [], 'Rocktype' : [], 'Page_Number' : [], 'Extra' : [], 'BNum' : [], 'Author' : [], 'Verified' : [], 'par_num': []}
 
 
         for boulder in self.array:
@@ -121,7 +127,15 @@ class VerfScreen(Screen):
             d['BNum'].append(boulder[0]['BNum'])
             d['Extra'].append(boulder[0]['Extra'])
             d['Author'].append(boulder[0]['Author'])
+
+            d['Volume'].append(boulder[0]['Volume'])
+            d['Weight'].append(boulder[0]['Weight'])
+            d['HASL'].append(boulder[0]['HASL'])
+            d['Compass'].append(boulder[0]['Compass'])
+            d['Distance'].append(boulder[0]['Distance'])
+
             d['Verified'].append(boulder[3])
+
 
         df = pd.DataFrame(data=d)
 
@@ -277,6 +291,10 @@ class VerfScreen(Screen):
                 if len(boulder['EBB']):
                     for box in boulder['EBB']:
                         pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                    
+                if len(boulder['CBB']):
+                    for box in boulder['CBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('orange'), outline_width=5)
 
                 display_string = ""
                 for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
@@ -429,6 +447,13 @@ class VerfScreen(Screen):
             self.current_aut = "Author : " + str(self.array[self.index][0]['Author'])
             self.current_size = "Size : " + str(self.array[self.index][0]['Size'])
             self.verf = self.array[self.index][3]
+
+            self.current_volume = "Volume : " + str(self.array[self.index][0]['Volume'])
+            self.current_weight = "Weight : " + str(self.array[self.index][0]['Weight'])
+            self.current_hasl = "HASL : " + str(self.array[self.index][0]['HASL'])
+            self.current_compass = "Compass : " + str(self.array[self.index][0]['Compass'])
+            self.current_distance = "Distance : " + str(self.array[self.index][0]['Distance'])
+            self.current_par_num = "Paragraph :" + str(self.array[self.index][0]['par_num'])
 
             if self.verf == "NOT VERIFIED":
                 self.verf_colour = "yellow"

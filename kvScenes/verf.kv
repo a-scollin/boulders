@@ -78,6 +78,7 @@
                 id: aut_title
                 text: root.current_aut
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            
 
                
                 
@@ -89,12 +90,40 @@
                     id: kk
                     size_hint : (1, 1)
                     texture: root.beeld.texture
-                    
-            TextInput:
-                id: verf_text
-                text: root.currenttext
-                focus: True 
-                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            BoxLayout:
+            id: image_box_layout
+            orientation : "vertical"     
+                GridLayout:
+                    id: image_Grid_layout
+                    Label:
+                        id: vol_title
+                        text: root.current_volume
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: weight_title
+                        text: root.current_weight
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: hasl_title
+                        text: root.current_hasl
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: compass_title
+                        text: root.current_compass
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: distance_title
+                        text: root.current_distance
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: par_num_title
+                        text: root.current_par_num
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                TextInput:
+                    id: verf_text
+                    text: root.currenttext
+                    focus: True 
+                    font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
         BoxLayout:
             id: button_boxlayout
             orientation: "horizontal"
