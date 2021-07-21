@@ -165,7 +165,8 @@ class VerfScreen(Screen):
                     highlight_colour = 'red'
                     highlight_amount = 1 
                 elif element[3] == 'NOT VERIFIED':
-                    continue
+                    highlight_colour = 'yellow'
+                    highlight_amount = 0.8
                 
                 # TODO Don't leave NOT VERIFIED have no attributes highlighted, just 
                 # don't highlight the bounding box 

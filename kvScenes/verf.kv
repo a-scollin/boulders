@@ -91,10 +91,12 @@
                     size_hint : (1, 1)
                     texture: root.beeld.texture
             BoxLayout:
-            id: image_box_layout
-            orientation : "vertical"     
+                id: image_box_layout
+                orientation : "vertical"     
                 GridLayout:
                     id: image_Grid_layout
+                    rows : 2
+                    col : 3
                     Label:
                         id: vol_title
                         text: root.current_volume
