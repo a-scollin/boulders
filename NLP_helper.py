@@ -49,7 +49,6 @@ def find_boulder_from_paragraph(match):
 
     sentence_length = 0
 
-
     extra = None
 
     rt_dict = {}
@@ -67,7 +66,7 @@ def find_boulder_from_paragraph(match):
         tagger.predict(flair_sentence)
 
 
-        if "boulders" in flair_sentence.to_original_text() and numberofboulders is None:
+        if ("Boulders" in flair_sentence.to_original_text() or "boulders" in flair_sentence.to_original_text()) and numberofboulders is None:
 
             numberstring, numberofboulders = find_number(flair_sentence)
 
@@ -78,8 +77,11 @@ def find_boulder_from_paragraph(match):
 
         can_extra_dict, can_extra = find_extra(flair_sentence,flair_sentence.to_original_text())
 
-        if extra is None and can_extra:
-            extra = can_extra
+        if can_extra:
+            if extra:
+                extra += " - " + can_extra
+            else:
+                extra = can_extra
 
         if can_extra_dict:
             for ext in can_extra_dict:
@@ -93,6 +95,23 @@ def find_boulder_from_paragraph(match):
                     extra_dict[ext].extend(ext_hl_array)
                 else:
                     extra_dict[ext] = ext_hl_array
+
+        # Run find size to search the sentence for the size of the boulder of form L x B x H
+        
+        can_siz_pos, can_size = find_size(flair_sentence,flair_sentence.to_original_text()) 
+
+        if can_size:     
+            if size:
+                size += ' - ' + can_size
+            else:
+                size = can_size
+
+        # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
+        if can_siz_pos:
+            for siz in can_siz_pos:
+                siz_pos[siz] = (can_siz_pos[siz][0]+sentence_length,can_siz_pos[siz][1]+sentence_length)
+
+        # Get size
 
         can_dim_dict, can_dims = find_dims(flair_sentence,flair_sentence.to_original_text())
 
@@ -111,6 +130,8 @@ def find_boulder_from_paragraph(match):
                     dim_dict[dim].extend(dim_hl_array)
                 else:
                     dim_dict[dim] = dim_hl_array
+
+        
 
 
         # Run find location to search the sentence for the location of the boulder. 
@@ -213,17 +234,7 @@ def find_boulder_from_paragraph(match):
                     aut_dict[aut] = aut_hl_array
 
 
-        # Run find size to search the sentence for the size of the boulder
         
-        can_siz_pos, can_size = find_size(flair_sentence,flair_sentence.to_original_text()) 
-
-        if size is None:    
-            size = can_size
-
-        # Get position of the size related features in the whole paragraph, size is variable therefore we use a dictionary instead of tuple
-        if can_siz_pos:
-            for siz in can_siz_pos:
-                siz_pos[siz] = (can_siz_pos[siz][0]+sentence_length,can_siz_pos[siz][1]+sentence_length)
 
         # Run find rocktype to search the sentence for the rocktype of the boulder. 
         

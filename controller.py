@@ -113,21 +113,16 @@ def get_boulders(word_data):
         cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
         cv2.startWindowThread()
 
-    # For each dataframe in word_data ie each page :
-
-    getting_location = False
     general_location = ""
 
+    # For each dataframe in word_data ie each page :
     for i in range(0,len(word_data)):
 
         print("Analysing page : " + str(page_number))
 
         img = cv2.cvtColor(np.array(word_data[i][1]), cv2.COLOR_RGB2BGR)
 
-        pd.set_option("display.max_rows", None, "display.max_columns", None)
-
-
-        p_nums = []
+        # Trying to remedy the paragraph mismatching from tesseract, This will set any par_num that is recognised as the first par_num to the last 
 
         for k, word in word_data[i][0].iterrows():
             if word['par_num'] > 1:
@@ -136,18 +131,17 @@ def get_boulders(word_data):
         if len(word_data[i][0]['par_num']):
             word_data[i][0].loc[(word_data[i][0].par_num == 1) & (word_data[i][0].index > k), 'par_num'] = max(word_data[i][0]['par_num'])
 
+        # Used for discarding multiple mention of same boulder on same page
 
         last_rocktype = ""
         last_size = ""
         last_location = ""
 
-        # For each word in the page : 
-
-        
+        # Loop through each page
 
         for j, row in word_data[i][0].iterrows():
             
-            # if the word is a boulder related search term, look for the boulders features! 
+            # For each word check if there is a new general location being mentioned and extract the placename from line and paragraph match
 
             if '.—' in row['text']:
                 words = word_data[i][0][(word_data[i][0]['line_num'] == row['line_num']) & (word_data[i][0]['par_num'] == row['par_num']) & (word_data[i][0]['word_num'] <= row['word_num'])]['text'].tolist()
@@ -159,17 +153,10 @@ def get_boulders(word_data):
                         general_location = word
                 
                 general_location = general_location.split('.—')[0]
-                
 
 
+            # if the word is a boulder related search term, look for the boulders features! 
             if ("boulder" in row['text'] or "Boulder" in row['text']):
-
-                # for confidence down the line
-                # p_nums.append(row["par_num"])
-
-                
-
-                # conf = 100 
 
                 # for whole boulder phrase bounding box
 
@@ -184,73 +171,29 @@ def get_boulders(word_data):
                 aut_bound = []
                 extra_bound = []
                 
-                (x, y, w, h) = (row['left'], row['top'], row['width'], row['height'])
-                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 5)
-                
-                b_bound = (x,y,x+w,y+h)
-
+                siz_char_count = 0
 
                 # Use paragraph where boulder search term was found for analysis
                 
                 loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, numbox, extra_pos, extra, dim_dict, dims, comp_dict = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
 
                 
-
-                
                 if len(general_location) and location:
                     location = general_location + ' - ' + location 
 
                 
-
-                # Highlight each word related to the boudlers features .. 
-                loc_char_count = 0
-                siz_char_count = 0
-                rt_char_count = 0 
-                aut_char_count = 0
-                ext_char_count = 0
+                # Boulder and boulder number tagging
 
                 if numbox:
                     (x,y,w,h) = numbox
                     cv2.rectangle(img, (x, y), (x + w, y + h), (40, 100, 200), 5)
 
-                if dim_dict:
-                    for dim in dim_dict:
-                        for (x,y,w,h) in dim_dict[dim]:
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 5)
-                            loc_bound.append((x,y,x+w,y+h))
+                (x, y, w, h) = (row['left'], row['top'], row['width'], row['height'])
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 0), 5)
+                
+                b_bound = (x,y,x+w,y+h)
 
-
-                if rt_pos:
-                    for dim in rt_pos:
-                        for (x,y,w,h) in rt_pos[dim]:
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
-                            rt_bound.append((x,y,x+w,y+h))
-
-                if aut_pos:
-                    for dim in aut_pos:
-                        for (x,y,w,h) in aut_pos[dim]:
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 5)
-                            aut_bound.append((x,y,x+w,y+h))
-
-                if extra_pos:
-                        for dim in extra_pos:
-                            for (x,y,w,h) in extra_pos[dim]:
-                                cv2.rectangle(img, (x, y), (x + w, y + h), (147,20,255), 5)
-                                extra_bound.append((x,y,x+w,y+h))
-                if loc_pos:
-                    for dim in loc_pos:
-                        for (x,y,w,h) in loc_pos[dim]:
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 5)
-                            loc_bound.append((x,y,x+w,y+h))
-                        
-                if comp_dict:
-                    for dim in comp_dict:
-                        for (x,y,w,h) in comp_dict[dim]:
-                            cv2.rectangle(img, (x, y), (x + w, y + h), (200, 70, 10), 5)
-                            loc_bound.append((x,y,x+w,y+h))
-                    
-
-                  
+                # Size tagging and paragraph tagging
 
                 for k, word in word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']].iterrows():
     
@@ -266,15 +209,7 @@ def get_boulders(word_data):
                     if word['top'] + word['height'] > greatest_y_h:
                         greatest_y_h = word['top'] + word['height']
                     
-                    
-
-                    
-                    
-
-                     
-                    
                     if siz_pos:
-                        # Size_pos has multiple dimensions.. 
                         for dim in siz_pos:
                             if (siz_char_count >= siz_pos[dim][0] and siz_char_count <= siz_pos[dim][1]): 
                                 (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
@@ -284,26 +219,61 @@ def get_boulders(word_data):
                                
                         siz_char_count += len(word['text']) + 1
 
-                    
 
+                if dim_dict:
+                    for dim in dim_dict:
+                        for (x,y,w,h) in dim_dict[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 5)
+                            siz_bound.append((x,y,x+w,y+h))
 
-                            
-                            
-                            #     if rt_char_count >= hl[0] and rt_char_count <= hl[1]:       
-                            #         (x, y, w, h) = (word['left'], word['top'], word['width'], word['height'])
-                                        
-                                    
-                            # rt_char_count += len(word['text']) + 1
+                # Primary and Secondary rocktype tagging 
+
+                if rt_pos:
+                    for dim in rt_pos:
+                        for (x,y,w,h) in rt_pos[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
+                            rt_bound.append((x,y,x+w,y+h))
+
+                if extra_pos:
+                        for dim in extra_pos:
+                            for (x,y,w,h) in extra_pos[dim]:
+                                cv2.rectangle(img, (x, y), (x + w, y + h), (147,20,255), 5)
+                                extra_bound.append((x,y,x+w,y+h))
+
+                # Tagging of Authors (People mentioned or excerpt references)
+
+                if aut_pos:
+                    for dim in aut_pos:
+                        for (x,y,w,h) in aut_pos[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 5)
+                            aut_bound.append((x,y,x+w,y+h))
+
+                # Tagging locations and compass directions
+
+                if loc_pos:
+                    for dim in loc_pos:
+                        for (x,y,w,h) in loc_pos[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 5)
+                            loc_bound.append((x,y,x+w,y+h))
+                        
+                if comp_dict:
+                    for dim in comp_dict:
+                        for (x,y,w,h) in comp_dict[dim]:
+                            cv2.rectangle(img, (x, y), (x + w, y + h), (200, 70, 10), 5)
+                            loc_bound.append((x,y,x+w,y+h))
+
+                
+                # If no location is found try setting the location to the last boulder on same pages location if not 
+                # just use the general location
 
                 if not location and len(locations) and page_number == page_numbers[len(page_numbers) - 1]:
                     location = locations[len(locations) - 1]
                     loc_pos = loc_boundings[len(loc_boundings) - 1]
                 elif not location and len(general_location):
                     location = general_location 
-
-                # If we have a location and rocktype it qualifies as a boulder ! 
-                
               
+                # For last_x matching
+
                 if not location:
                     location = ""                    
 
@@ -314,18 +284,26 @@ def get_boulders(word_data):
                     rocktype = ""                    
         
                 if not (location == last_location and size == last_size and rocktype == last_rocktype):
-                    
-
+            
                     last_rocktype = rocktype
                     last_size = size
                     last_location = location
                 
+                    # Increase the paragraph bounding box for easy viewing and highlight on page
+
                     least_y -= 100
                     least_x -= 100
                     greatest_y_h += 100
                     greatest_x_w += 100
 
+                    cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
+
+                    # Fill data into arrays
+
                     numbers.append(number)
+
+                    number += 1
+
                     locations.append(location)
                     sizes.append(size)
                     rocktypes.append(rocktype)
@@ -341,12 +319,8 @@ def get_boulders(word_data):
                     extra_boundings.append(extra_bound)
                     full_boundings.append((least_x,least_y,greatest_x_w,greatest_y_h))
                     par_nums.append(row['par_num'])
-                    cv2.rectangle(img, (least_x, least_y), (greatest_x_w, greatest_y_h), (255, 0, 255), 8)
-                    number += 1
-            
 
-
-        if print_page or page_number == 11:
+        if print_page:
             print(word_data[i][0])
             d = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Page_Number' : page_numbers, 'BNum' : array_numberofboulders, 'Extra' : extras, 'EBB' : extra_boundings, 'Author' : authors, 'ABB' : aut_boundings, 'FullBB' : full_boundings, 'BBB' : b_boundings, 'LBB' : loc_boundings, 'SBB' : siz_boundings, 'RBB' : rt_boundings, 'par_num' : par_nums}
             print(d)
