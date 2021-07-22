@@ -40,43 +40,53 @@
         BoxLayout:
             orientation: "horizontal"
             id: attributes_labels
-            size_hint: (1, 0.3)
+            size_hint: (1,0.2)
+            padding_bottom: 0.2
             Label:
                 id: boulder_title
+                text_size: self.size
                 text: root.boulder_number
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: verf_title
                 color : root.verf_colour
                 text: root.verf
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: page_title
                 text: root.page_number
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: location_title
                 text: root.current_location
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: rocktype_title
                 text: root.current_rocktype
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: size_title
                 text: root.current_size
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: bnum_title
                 text: root.current_bnum
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: ext_title
                 text: root.current_ext
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             Label:
                 id: aut_title
                 text: root.current_aut
+                text_size: self.size
                 font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
             
 
@@ -97,28 +107,35 @@
                     id: image_Grid_layout
                     rows : 2
                     col : 3
+                    padding: [0, 0, 0, 2] 
                     Label:
                         id: vol_title
+                        text_size: self.size
                         text: root.current_volume
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                     Label:
                         id: weight_title
+                        text_size: self.size
                         text: root.current_weight
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                     Label:
                         id: hasl_title
+                        text_size: self.size
                         text: root.current_hasl
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                     Label:
                         id: compass_title
+                        text_size: self.size
                         text: root.current_compass
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                     Label:
                         id: distance_title
+                        text_size: self.size
                         text: root.current_distance
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                     Label:
                         id: par_num_title
+                        text_size: self.size
                         text: root.current_par_num
                         font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
                 TextInput:
