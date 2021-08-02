@@ -22,10 +22,11 @@ def get_spellchecked_volume(number):
         df = OCR.read_image_to_df(image)
         for word in df["text"]:
             unchecked_words.append(word)
-        
-        print(df)
 
         word_data.append((df,image))
+    
+
+    print("Attempting Spell Check..")
 
     corrections = attempt_spellcheck_on_volume(unchecked_words)
 

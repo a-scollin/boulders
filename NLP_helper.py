@@ -176,7 +176,7 @@ def find_boulder_from_paragraph(match):
             for loc in can_loc_dict:
                 loc_hl_array = []
                 for j, word in match.iterrows():
-                    if loc in word['text']:
+                    if loc in word['text'] and len(loc):
                         if not loc[0].isupper() and len(loc) < 4:
                             continue
                         box = (word['left'], word['top'], word['width'], word['height'])

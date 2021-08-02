@@ -20,14 +20,14 @@ import SPL_helper as SPL
 
 
 # This is the main entry point function for the project, it takes a number as an argument and will run a complete boulder data extraction over whatever volume is specified
-def review_vol(number):
+def review_vol(number, page_number=None, print_page=None):
 
     patch = False
 
 
-    # Reports 3 and 4 are a different structure being entries in a journal instead of their own books. 
-    if number == "3" or number == "4":
-        return print_vol(number)
+    # Reports 3 and 4 are a different structure being entries in a journal and have 4 pages to an image. 
+    # if number == "3" or number == "4":
+    #     return print_vol(number)
         
     print("Reviewing volume : " + str(number))
     print("Running OCR and Spellchecker...")
@@ -38,11 +38,11 @@ def review_vol(number):
        
 
     # Saving this data so we don't need to OCR and Spellcheck every time
-    with open('word_data.pickle', 'wb') as f:
+    with open('word_data_ ' + str(number) + '.pickle', 'wb') as f:
         pickle.dump(word_data, f)
-    
+
     # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
-    df, df_for_saving = get_boulders(word_data)
+    df, df_for_saving = get_boulders(word_data,page_number,print_page)
 
     print("All done!")
 
@@ -54,18 +54,15 @@ def review_vol(number):
 
     # Saving output
 
-    # if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
-    if True:
-        with open('boulder_data' + str(number) + '.pickle', 'wb') as f:
-            pickle.dump((word_data, df), f)
+    with open('boulder_data' + str(number) + '.pickle', 'wb') as f:
+        pickle.dump((word_data, df), f)
 
-    # if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
-        df_for_saving.to_csv("boulder_data" + str(number) + '.csv')
+    df_for_saving.to_csv("boulder_data" + str(number) + '.csv')
 
 
 
 # TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
-def get_boulders(word_data):
+def get_boulders(word_data, page_number=None, print_page=None):
 
 
     numbers = []
@@ -114,9 +111,13 @@ def get_boulders(word_data):
 
     number = 0
 
-    page_number = int(input("What page number did the scan start at? : "))
+    if page_number is None:
 
-    print_page = True if input("Would you like to print each page? ( enter y or n ) : ") == 'y' else False 
+        page_number = int(input("What page number did the scan start at? : "))
+
+    if print_page is None:
+
+        print_page = True if input("Would you like to print each page? ( enter y or n ) : ") == 'y' else False 
     
     print("Running NLP...")
     
@@ -426,6 +427,13 @@ def print_one_volume(number):
     images = convert_from_path("./bouldercopies/" + str(number) + "_Report.pdf", 500)    
     for image in images:
         OCR.print_from_image(image)
+
+
+def analyse_everything():
+    report_nums = [(1,21),(3,0),(4,0),(5,3),(6,3),(7,3),(8,3),(9,193),(10,769)]
+
+    for report, page_num in report_nums:
+        review_vol(report,page_num,False)
 
 
 # two optional arguments, either no arguments then you will be prompted for a number, enter a number, or enter the path to the word_data and word_string !  
