@@ -24,6 +24,8 @@ def review_vol(number, page_number=None, print_page=None):
 
     patch = False
 
+    if page_number is None:
+        page_number = int(input("Please enter starting page number : "))
 
     # Reports 3 and 4 are a different structure being entries in a journal and have 4 pages to an image. 
     # if number == "3" or number == "4":
@@ -42,7 +44,7 @@ def review_vol(number, page_number=None, print_page=None):
         pickle.dump(word_data, f)
 
     # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
-    df, df_for_saving = get_boulders(word_data,page_number,print_page)
+    df, df_for_saving = get_boulders(word_data,number,page_number,print_page)
 
     print("All done!")
 
@@ -54,15 +56,15 @@ def review_vol(number, page_number=None, print_page=None):
 
     # Saving output
 
-    with open('boulder_data' + str(number) + '.pickle', 'wb') as f:
-        pickle.dump((word_data, df), f)
+    with open('report_'+ str(number) + '_boulders.pickle', 'wb') as f:
+        pickle.dump((word_data, df, page_number), f)
 
     df_for_saving.to_csv("boulder_data" + str(number) + '.csv')
 
 
 
 # TODO: Entry point for analysing the OCR'ed data.. Will need to be expanded to include multiple page spanning analysis and more search terms, not just boulder. 
-def get_boulders(word_data, page_number=None, print_page=None):
+def get_boulders(word_data, number, page_number=None, print_page=None):
 
 
     numbers = []
@@ -157,16 +159,18 @@ def get_boulders(word_data, page_number=None, print_page=None):
             
             # For each word check if there is a new general location being mentioned and extract the placename from line and paragraph match
 
-            if '.—' in row['text']:
-                words = word_data[i][0][(word_data[i][0]['line_num'] == row['line_num']) & (word_data[i][0]['par_num'] == row['par_num']) & (word_data[i][0]['word_num'] <= row['word_num'])]['text'].tolist()
-                general_location = ''
-                for word in words:
-                    if len(general_location):
-                        general_location += " " + word 
-                    else:
-                        general_location = word
-                
-                general_location = general_location.split('.—')[0]
+            if number == 5 or number == 6 or number == 1 or number == 10:
+
+                if '.—' in row['text']:
+                    words = word_data[i][0][(word_data[i][0]['line_num'] == row['line_num']) & (word_data[i][0]['par_num'] == row['par_num']) & (word_data[i][0]['word_num'] <= row['word_num'])]['text'].tolist()
+                    general_location = ''
+                    for word in words:
+                        if len(general_location):
+                            general_location += " " + word 
+                        else:
+                            general_location = word
+                    
+                    general_location = general_location.split('.—')[0]
 
 
             # if the word is a boulder related search term, look for the boulders features! 
@@ -190,7 +194,7 @@ def get_boulders(word_data, page_number=None, print_page=None):
 
                 # Use paragraph where boulder search term was found for analysis
                 
-                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, numbox, extra_pos, extra, dim_dict, volume, weight, hasl, distance, comp_dict, compass_direction = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']])
+                loc_pos, siz_pos, rt_pos, aut_pos, location, size, rocktype, author, numberofboulders, numbox, extra_pos, extra, dim_dict, volume, weight, hasl, distance, comp_dict, compass_direction = NLP_helper.find_boulder_from_paragraph(word_data[i][0].loc[word_data[i][0]['par_num'] == row['par_num']], number)
 
                 
                 if len(general_location) and location:
@@ -440,7 +444,12 @@ def analyse_everything():
 
 if len(sys.argv) == 2:
 
-    review_vol(sys.argv[1])
+    if sys.argv[1] == '-a':
+        analyse_everything()
+    else:
+        review_vol(sys.argv[1])
+
+    
 
 elif len(sys.argv) == 3:
     

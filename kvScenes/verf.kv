@@ -9,7 +9,7 @@
             id: landing_title
             size_hint: (1.0,0.2)
             text: "Please choose your pickle file for verification :"
-        FileChooserIconView:
+        FileChooserListView:
             size_hint: (1.0,0.8)
             id: filechooser
             path: "./"
@@ -18,9 +18,6 @@
         orientation: "horizontal"
         id: first_screen_boxlayout
         size_hint: (1.0,0.1)
-        TextInput:
-            hint_text: 'Start Page:'
-            on_text : app.page_num = self.text
         ToggleButton:
             text: 'Preloaded?'
             on_press : app.preloaded = True if self.state == 'down' else False

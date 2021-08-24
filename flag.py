@@ -16,7 +16,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 import pandas as pd
-
+from kivy.config import Config
+Config.set('kivy', 'exit_on_escape', '0')
 
 
 from PIL import Image as Im
@@ -39,8 +40,11 @@ class LandingScreen(Screen):
 
 class VerfScreen(Screen):
 
+
+    path = "Beans"
     page_number = StringProperty("")
     focused = False
+    setup_done = False
     current_location = StringProperty("")
     current_rocktype = StringProperty("")
     current_size = StringProperty("")
@@ -71,7 +75,7 @@ class VerfScreen(Screen):
     def __init__(self, **kwargs):
         super(VerfScreen, self).__init__(**kwargs)
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        self._keyboard.bind(on_key_up=self._on_keyboard_up)
 
     def save_progress(self):
         
@@ -83,8 +87,8 @@ class VerfScreen(Screen):
                 save_array.append(boulder)
 
             
-        with open('array.pickle', 'wb') as f:
-            pickle.dump((save_array,self.word_data), f)
+        with open(self.path, 'wb') as f:
+            pickle.dump((save_array,self.word_data,self.start_page_number), f)
 
         self.array = save_array 
         self.index = 0
@@ -127,13 +131,11 @@ class VerfScreen(Screen):
             d['BNum'].append(boulder[0]['BNum'])
             d['Extra'].append(boulder[0]['Extra'])
             d['Author'].append(boulder[0]['Author'])
-
             d['Volume'].append(boulder[0]['Volume'])
             d['Weight'].append(boulder[0]['Weight'])
             d['HASL'].append(boulder[0]['HASL'])
             d['Compass'].append(boulder[0]['Compass'])
             d['Distance'].append(boulder[0]['Distance'])
-
             d['Verified'].append(boulder[3])
 
 
@@ -211,9 +213,9 @@ class VerfScreen(Screen):
 
         pages[0].save("export.pdf", save_all=True, append_images=pages[1:])
 
-    def setup(self, path, page_num, preload):
+    def setup(self, path, preload):
         
-        if path.split('.').pop() != 'pickle' or not str(page_num).isnumeric():
+        if path.split('.').pop() != 'pickle':
 
             self.manager.current = 'landing'
 
@@ -221,10 +223,6 @@ class VerfScreen(Screen):
             
             if path.split('.').pop() != 'pickle':
                 buttonText += 'Please select a pickle file returned from running controller.py!'
-
-            print(page_num)
-            if not str(page_num).isnumeric():
-                buttonText += "\n\nPlease ensure you have supplied a number for the page start"
 
 
             # create content and add to the popup
@@ -241,11 +239,8 @@ class VerfScreen(Screen):
 
         elif preload:
 
-             # create content and add to the popup
-            self.start_page_number = int(page_num)
-            
             with open(path, 'rb') as f:
-                self.array, self.word_data = pickle.load(f)
+                self.array, self.word_data, self.start_page_number = pickle.load(f)
             
             theimage = Im.open("./testingsnips/boulder.jpg")
             data = BytesIO()
@@ -257,10 +252,7 @@ class VerfScreen(Screen):
         else:
             
             with open(path, 'rb') as f:
-                self.word_data, self.boulder_data = pickle.load(f)
-
-            # create content and add to the popup
-            self.start_page_number = int(page_num)
+                self.word_data, self.boulder_data, self.start_page_number = pickle.load(f)
 
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
@@ -310,16 +302,29 @@ class VerfScreen(Screen):
             im = CoreImage(BytesIO(data.read()), ext='png')
             self.beeld.texture = im.texture
 
+        self.setup_done = True
+        self.path = path
         return True
     def _keyboard_closed(self):
         
         return
 
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    def _on_keyboard_up(self, keyboard, keycode):
 
-        if self.focused:
+        if not self.setup_done:
             return False
 
+        if self.focused:
+            if keycode[1] == 'enter' and self.sub_but:
+                self.submit_attribute(self.sub_but)
+                self.popup.dismiss()
+            if keycode[1] == 'escape' and self.popup:
+                self.togglefocus(0)
+                self.popup.dismiss()
+                return True
+            return False
+
+        print(keycode)
         if keycode[1] == 'r':
             self.go_forward()
         if keycode[1] == 'w':
@@ -364,31 +369,32 @@ class VerfScreen(Screen):
         box = BoxLayout(orientation="vertical")
         self.loca = TextInput(text=str(self.array[self.index][0][attribute]),multiline=False)
         box.add_widget(self.loca)
-        sub_but = Button(text="Submit Changes - " + attribute)
+        self.sub_but = Button(text="Submit Changes - " + attribute)
         dis_but = Button(text="Dismiss")
-        box.add_widget(sub_but)
+        box.add_widget(self.sub_but)
         box.add_widget(dis_but)
-        popup = Popup(title=attribute, content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
-        sub_but.bind(on_press = self.submit_attribute)
-        sub_but.bind(on_press = popup.dismiss)
+        self.popup = Popup(title=attribute, content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
+        self.sub_but.bind(on_press = self.submit_attribute)
+        self.sub_but.bind(on_press = self.popup.dismiss)
         dis_but.bind(on_press=self.togglefocus)
-        dis_but.bind(on_press=popup.dismiss)  
+        dis_but.bind(on_press=self.popup.dismiss)  
         # open the popup
-        popup.open()        
+        self.popup.open()      
+        self.loca.focus = True  
 
 
     def submit_attribute(self, button):
+        if button:
+            self.togglefocus(0)
+            location = self.loca.text
+            
+            tmp = list(self.array[self.index])
+            boulder = tmp[0]
+            boulder[button.text.split('-')[1].strip()] = location
+            tmp[0] = boulder
+            self.array[self.index] = tuple(tmp)
         
-        self.togglefocus(0)
-        location = self.loca.text
-        
-        tmp = list(self.array[self.index])
-        boulder = tmp[0]
-        boulder[button.text.split('-')[1].strip()] = location
-        tmp[0] = boulder
-        self.array[self.index] = tuple(tmp)
-    
-        self.update()
+            self.update()
 
     def go_back(self):
         if self.index > 0:
@@ -512,7 +518,6 @@ class MyScreenManager(ScreenManager):
 class MyApp(App):
 
     path = "beans"
-    page_num = 0
     preloaded = False
     def build(self):
         self.title = "Boulder Verification App"
@@ -523,7 +528,7 @@ class MyApp(App):
 
     def start_verf(self):
         
-        if self.MyScreenManager.get_screen('verf').setup(self.path,self.page_num,self.preloaded):
+        if self.MyScreenManager.get_screen('verf').setup(self.path,self.preloaded):
             self.MyScreenManager.current = 'verf'
 
 

@@ -34,7 +34,7 @@ with open('./dictionaries/colours.txt', 'r') as f:
     
 
 # This function will extract information about singular boulder paragraphs (ie. a numbered paragraph that refers to a single boulder), returns the attributes found within the paragraph
-def find_boulder_from_paragraph(match):
+def find_boulder_from_paragraph(match,number):
   
     paragraph = ""
     for word in match.text:
@@ -165,7 +165,7 @@ def find_boulder_from_paragraph(match):
 
         # Run find location to search the sentence for the location of the boulder. 
        
-        can_loc_dict, can_location = find_location(flair_sentence,match)
+        can_loc_dict, can_location = find_location(flair_sentence,match,number)
 
         # Just take first location found as there are so many..
 
@@ -242,7 +242,7 @@ def find_boulder_from_paragraph(match):
         
         # Find author or citation reference 
 
-        can_aut_dict, can_author = find_author(flair_sentence)
+        can_aut_dict, can_author = find_author(flair_sentence,number)
 
         if author is None and can_author:
             author = can_author
@@ -400,10 +400,10 @@ def find_number(flair_sentence):
                         return None, None
     return None, None
 
-def find_author(flair_sentence):
+def find_author(flair_sentence,number):
 
     # Hard code for the keyword report found within brackets!
-    if True:
+    if number == 10 or number == 1:
 
         author = None 
 
@@ -620,30 +620,21 @@ def find_rocktype(flair_sentence, sentence):
 
 # TODO needs more accurate location ! 
 
-def find_location(flair_sentence,match):    
+def find_location(flair_sentence,match,number):    
     location = ''    
     locs = []
 
     # Manual override for first report as the text orientation is consistent
-    if False:
+    if number == 1:
         senlen = 0
         for word in match.iterrows():
             if word[1]['left'] < 900:
                 if not word[1]['text'].isupper():                    
                     location = word[1]['text']
-                    loc_dict[word[1]["text"]] = (senlen,senlen+len(word[1]))
+                    locs.append(word[1]['text'])
             senlen += len(word[1]['text'])
     
         location = location.split(".—")[0]
-    
-    if False:
-        for j, word in match.iterrows():
-            if '.—' in word['text'] and word['text'][0].isupper():
-                location = word['text'].split('.—')[0]
-                locs.append(word['text'])
-                break
-
-
 
     
     for entity in flair_sentence.to_dict(tag_type='ner')['entities']:
