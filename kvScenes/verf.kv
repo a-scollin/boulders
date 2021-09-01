@@ -18,9 +18,6 @@
         orientation: "horizontal"
         id: first_screen_boxlayout
         size_hint: (1.0,0.1)
-        ToggleButton:
-            text: 'Preloaded?'
-            on_press : app.preloaded = True if self.state == 'down' else False
         Button:
             text: 'Start!'
             on_press : app.start_verf() 

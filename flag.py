@@ -91,7 +91,7 @@ class VerfScreen(Screen):
 
             
         with open(self.path, 'wb') as f:
-            pickle.dump((self.word_data,save_array,self.start_page_number,self.report_number), f)
+            pickle.dump((self.word_data,save_array,self.start_page_number,self.report_number,True), f)
 
         self.array = save_array 
         self.index = 0
@@ -230,7 +230,7 @@ class VerfScreen(Screen):
 
         pages[0].save("export.pdf", save_all=True, append_images=pages[1:])
 
-    def setup(self, path, preload):
+    def setup(self, path):
         
         if path.split('.').pop() != 'pickle':
 
@@ -254,63 +254,65 @@ class VerfScreen(Screen):
 
             return False
 
-        elif preload:
-
-            with open(path, 'rb') as f:
-                self.word_data, self.array, self.start_page_number, self.report_number = pickle.load(f)
-            
-            theimage = Im.open("./testingsnips/boulder.jpg")
-            data = BytesIO()
-            theimage.save(data, format='png')            
-            data.seek(0) # yes you actually need this
-            im = CoreImage(BytesIO(data.read()), ext='png')
-            self.beeld.texture = im.texture
-
         else:
             
             with open(path, 'rb') as f:
-                self.word_data, self.boulder_data, self.start_page_number, self.report_number = pickle.load(f)
+                loaded_data = pickle.load(f)
 
-            for i, boulder in self.boulder_data.iterrows():
-                area = boulder['FullBB']
 
-                area = (area[0]-50,area[1]-50,area[2]+50,area[3]+50)
+            if len(loaded_data) == 4:
 
-                wd_index = boulder['Page_Number']-self.start_page_number
-                
-                pageimg = self.word_data[wd_index][1]
-            
-                pageimg = self.highlight_area(pageimg, boulder['BBB'], 1.5, outline_color=ImageColor.getrgb('cyan'), outline_width=5)
-                
-                if len(boulder['LBB']):
-                    for box in boulder['LBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('green'), outline_width=5)
+                self.word_data, boulder_data, self.start_page_number, self.report_number = loaded_data
 
-                if len(boulder['SBB']):
-                    for box in boulder['SBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('red'), outline_width=5)
+                for i, boulder in boulder_data.iterrows():
+                    area = boulder['FullBB']
 
-                if len(boulder['RBB']):
-                    for box in boulder['RBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                    area = (area[0]-50,area[1]-50,area[2]+50,area[3]+50)
 
-                if len(boulder['ABB']):
-                    for box in boulder['ABB']:
-                        pageimg = self.highlight_area(pageimg, box, 1.5, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
-
-                if len(boulder['EBB']):
-                    for box in boulder['EBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                    wd_index = boulder['Page_Number']-self.start_page_number
                     
-                if len(boulder['CBB']):
-                    for box in boulder['CBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('orange'), outline_width=5)
-
-                display_string = ""
-                for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
-                    display_string += word['text'] + " "
+                    pageimg = self.word_data[wd_index][1]
                 
-                self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED",boulder['Page_Number']))
+                    pageimg = self.highlight_area(pageimg, boulder['BBB'], 1.2, outline_color=ImageColor.getrgb('cyan'), outline_width=5)
+                    
+                    if len(boulder['LBB']):
+                        for box in boulder['LBB']:
+                            pageimg = self.highlight_area(pageimg, box, 1.2, outline_color=ImageColor.getrgb('green'), outline_width=5)
+
+                    if len(boulder['SBB']):
+                        for box in boulder['SBB']:
+                            pageimg = self.highlight_area(pageimg, box, 1.2, outline_color=ImageColor.getrgb('red'), outline_width=5)
+
+                    if len(boulder['RBB']):
+                        for box in boulder['RBB']:
+                            pageimg = self.highlight_area(pageimg, box, 1.2, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+
+                    if len(boulder['ABB']):
+                        for box in boulder['ABB']:
+                            pageimg = self.highlight_area(pageimg, box, 1.2, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
+
+                    if len(boulder['EBB']):
+                        for box in boulder['EBB']:
+                            pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                        
+                    if len(boulder['CBB']):
+                        for box in boulder['CBB']:
+                            pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('orange'), outline_width=5)
+
+                    display_string = ""
+                    for k, word in self.word_data[wd_index][0].loc[self.word_data[wd_index][0]['par_num'] == boulder['par_num']].iterrows():
+                        display_string += word['text'] + " "
+                    
+                    self.array.append((boulder, pageimg.crop(area),display_string, "NOT VERIFIED",boulder['Page_Number']))
+            
+            elif len(loaded_data) == 5:
+            
+                self.word_data, self.array, self.start_page_number, self.report_number, preloaded = loaded_data
+
+            else:
+                print(loaded_data)
+                raise("Wrong format of pickle file..")
+
 
             theimage = Im.open("./testingsnips/boulder.jpg")
             data = BytesIO()
@@ -544,7 +546,6 @@ class MyScreenManager(ScreenManager):
 class MyApp(App):
 
     path = "beans"
-    preloaded = False
     def build(self):
         self.title = "Boulder Verification App"
         self.MyScreenManager = ScreenManager()
@@ -554,7 +555,7 @@ class MyApp(App):
 
     def start_verf(self):
         
-        if self.MyScreenManager.get_screen('verf').setup(self.path,self.preloaded):
+        if self.MyScreenManager.get_screen('verf').setup(self.path):
             self.MyScreenManager.current = 'verf'
 
 
