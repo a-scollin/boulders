@@ -60,6 +60,9 @@ class VerfScreen(Screen):
     
     verf = StringProperty("")
     verf_colour = ColorProperty('yellow')
+
+   
+
     
     start_page_number = 0
     boulder_number = StringProperty("")
@@ -68,7 +71,7 @@ class VerfScreen(Screen):
     t_y = NumericProperty(0.0)
     x1 = y1 = x2 = y2 = NumericProperty(0.0)
     array = []
-    currenttext = StringProperty("Help ? \nKeyboard Bindings\n q = Go back\n w = Bad Boulder \n e = Good Boulder\n r = Go forward\np = Change Location\nGo forward to start verifying.")
+    currenttext = StringProperty("Help ? \nKeyboard Bindings\nq = Go back\nw = Bad Boulder\ne = Good Boulder\nr = Go forward\nt = Location\ny = Rocktype\nu = Size\ni = Number of Boulders (BNum)\no = Extra\np = Author\ng = Volume\nh = Weight\nj = Height above sea level (HASL)\nk = Compass\nl = Distance\nf = SET FULL PAGE VIEW.\n##################\nGo forward to start verifying.")
     index = -1
     beeld = kiImage() # only use this line in first code instance
 
@@ -88,7 +91,7 @@ class VerfScreen(Screen):
 
             
         with open(self.path, 'wb') as f:
-            pickle.dump((save_array,self.word_data,self.start_page_number), f)
+            pickle.dump((self.word_data,save_array,self.start_page_number,self.report_number), f)
 
         self.array = save_array 
         self.index = 0
@@ -102,16 +105,25 @@ class VerfScreen(Screen):
         box.add_widget(b1)
         b2 = Button(text="Export to csv")
         box.add_widget(b2)
-        b3 = Button(text="Dismiss")
+        b3 = Button(text="Export to pdf and csv")
         box.add_widget(b3)
+        b4 = Button(text="Dismiss")
+        box.add_widget(b4)
+
         popup = Popup(title='Save and Export', content=box, auto_dismiss=False, size_hint=(0.8, 0.5))
 
         # bind the on_press event of the button to the dismiss function
         b1.bind(on_press=self.export_pdf)
         b1.bind(on_press=popup.dismiss)
+        
         b2.bind(on_press=self.export_csv)
         b2.bind(on_press=popup.dismiss)
+        
+        b3.bind(on_press=self.export_pdf)
+        b3.bind(on_press=self.export_csv)
         b3.bind(on_press=popup.dismiss)
+        
+        b4.bind(on_press=popup.dismiss)
 
         # open the popup
         popup.open()
@@ -168,11 +180,9 @@ class VerfScreen(Screen):
                     highlight_amount = 1 
                 elif element[3] == 'NOT VERIFIED':
                     highlight_colour = 'yellow'
-                    highlight_amount = 0.8
+                    highlight_amount = 1
                 
-                # TODO Don't leave NOT VERIFIED have no attributes highlighted, just 
-                # don't highlight the bounding box 
-
+        
                 x,y,x_w,y_h = boulder['FullBB']
 
                 y += 100
@@ -181,7 +191,7 @@ class VerfScreen(Screen):
                 x_w -= 100
 
                 box = (x,y,x_w,y_h)
-                
+
                 if box not in boxes:
 
                     pageimg = self.highlight_area(pageimg, box, highlight_amount, outline_color=ImageColor.getrgb(highlight_colour), outline_width=5)
@@ -189,11 +199,11 @@ class VerfScreen(Screen):
 
                 if len(boulder['LBB']):
                     for box in boulder['LBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('pink'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('green'), outline_width=5)
 
                 if len(boulder['SBB']):
                     for box in boulder['SBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('yellow'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('red'), outline_width=5)
 
                 if len(boulder['RBB']):
                     for box in boulder['RBB']:
@@ -205,7 +215,14 @@ class VerfScreen(Screen):
                 
                 if len(boulder['EBB']):
                     for box in boulder['EBB']:
-                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('blue'), outline_width=5)
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('honeydew'), outline_width=5)
+
+                if len(boulder['CBB']):
+                    for box in boulder['CBB']:
+                        pageimg = self.highlight_area(pageimg, box, 1, outline_color=ImageColor.getrgb('darkgreen'), outline_width=5)
+                
+                if len(boulder['BBB']):
+                    pageimg = self.highlight_area(pageimg, boulder['BBB'], 1, outline_color=ImageColor.getrgb('plum'), outline_width=5)
 
             pages.append(pageimg)
 
@@ -240,7 +257,7 @@ class VerfScreen(Screen):
         elif preload:
 
             with open(path, 'rb') as f:
-                self.array, self.word_data, self.start_page_number = pickle.load(f)
+                self.word_data, self.array, self.start_page_number, self.report_number = pickle.load(f)
             
             theimage = Im.open("./testingsnips/boulder.jpg")
             data = BytesIO()
@@ -252,7 +269,7 @@ class VerfScreen(Screen):
         else:
             
             with open(path, 'rb') as f:
-                self.word_data, self.boulder_data, self.start_page_number = pickle.load(f)
+                self.word_data, self.boulder_data, self.start_page_number, self.report_number = pickle.load(f)
 
             for i, boulder in self.boulder_data.iterrows():
                 area = boulder['FullBB']
@@ -262,7 +279,7 @@ class VerfScreen(Screen):
                 wd_index = boulder['Page_Number']-self.start_page_number
                 
                 pageimg = self.word_data[wd_index][1]
-
+            
                 pageimg = self.highlight_area(pageimg, boulder['BBB'], 1.5, outline_color=ImageColor.getrgb('cyan'), outline_width=5)
                 
                 if len(boulder['LBB']):
@@ -324,7 +341,6 @@ class VerfScreen(Screen):
                 return True
             return False
 
-        print(keycode)
         if keycode[1] == 'r':
             self.go_forward()
         if keycode[1] == 'w':
@@ -333,19 +349,29 @@ class VerfScreen(Screen):
             self.good_boulder(True)
         if keycode[1] == 'd':
             self.drop_boulder(False)
-        if keycode[1] == 'y':
+        if keycode[1] == 't':
             self.update_attribute('Location')
-        if keycode[1] == 'u':
+        if keycode[1] == 'y':
             self.update_attribute('Rocktype')
-        if keycode[1] == 'i':
+        if keycode[1] == 'u':
             self.update_attribute('Size')
-        if keycode[1] == 'o':
+        if keycode[1] == 'i':
             self.update_attribute('BNum')
+        if keycode[1] == 'o':
+            self.update_attribute('Extra')
         if keycode[1] == 'p':
             self.update_attribute('Author')
-        if keycode[1] == 'l':
-            self.update_attribute('Extra')
+        if keycode[1] == 'g':
+            self.update_attribute('Volume')
+        if keycode[1] == 'h':
+            self.update_attribute('Weight')
+        if keycode[1] == 'j':
+            self.update_attribute('HASL')
         if keycode[1] == 'k':
+            self.update_attribute('Compass')
+        if keycode[1] == 'l':
+            self.update_attribute('Distance')
+        if keycode[1] == 'f':
             self.set_full()
         
         elif keycode[1] == 'q':

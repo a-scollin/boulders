@@ -40,8 +40,8 @@ def review_vol(number, page_number=None, print_page=None):
        
 
     # Saving this data so we don't need to OCR and Spellcheck every time
-    with open('word_data_ ' + str(number) + '.pickle', 'wb') as f:
-        pickle.dump(word_data, f)
+    with open('word_data_' + str(number) + '.pickle', 'wb') as f:
+        pickle.dump((word_data, page_number, number), f)
 
     # Get boulders using NLP techniques.. Also an entry point for the saved OCR to be analysed 
     df, df_for_saving = get_boulders(word_data,number,page_number,print_page)
@@ -57,7 +57,7 @@ def review_vol(number, page_number=None, print_page=None):
     # Saving output
 
     with open('report_'+ str(number) + '_boulders.pickle', 'wb') as f:
-        pickle.dump((word_data, df, page_number), f)
+        pickle.dump((word_data, df, page_number, number), f)
 
     df_for_saving.to_csv("boulder_data" + str(number) + '.csv')
 
@@ -359,6 +359,8 @@ def get_boulders(word_data, number, page_number=None, print_page=None):
 
         page_number += 1
  
+    # Formatted for CSV
+    
     d_for_saving = {'Numbers' : numbers, 'Location': locations, 'Size' : sizes, 'Rocktype' : rocktypes, 'Volume' : volumes, 'Weight' : weights, 'Height above sea level' : hasls, 'Compass' : compass_directions, 'Distance' : distances, 'Number of Boulders mentioned' : array_numberofboulders, 'Extra' : extras, 'Author' : authors, 'Paragraph' : par_nums, 'Page' : page_numbers}
     
     df_for_saving = pd.DataFrame(data=d_for_saving)
@@ -458,10 +460,19 @@ elif len(sys.argv) == 3:
         raise
 
     with open(sys.argv[2], 'rb') as f:
-        word_data = pickle.load(f)
-    
-   
-    df, df_for_saving = get_boulders(word_data)
+        loaded_data = pickle.load(f)
+
+    if len(loaded_data) == 4:
+        # Checking if it's a boulder file or a word_data file 
+        word_data, boulders, page_number, report_number = loaded_data
+    elif len(loaded_data) == 3:
+        word_data, page_number, report_number = loaded_data
+    else:
+        print(loaded_data)
+        raise("Incorrect pickle")
+
+
+    df, df_for_saving = get_boulders(word_data,report_number,page_number)
 
     print("All done!")
 
@@ -469,13 +480,11 @@ elif len(sys.argv) == 3:
 
     print(df)
 
-    # if input("Would you like to save this data to a pickle file for verification ?  ( enter y or n ) : " ) == 'y':
-    if True:
-        with open('report10_data.pickle', 'wb') as f:
-            pickle.dump((word_data, df), f)
+    
+    with open('report_'+ str(report_number) + '_boulders.pickle', 'wb') as f:
+        pickle.dump((word_data, df, page_number, report_number), f)
 
-    # if input("Would you like to save this data to a csv file?  ( enter y or n ) : " ) == 'y':
-        df_for_saving.to_csv("report10_noverf.csv")
+    df_for_saving.to_csv("report10_noverf.csv")
 
 else:
 
