@@ -480,11 +480,10 @@ elif len(sys.argv) == 3:
 
     print(df)
 
-    
     with open('report_'+ str(report_number) + '_boulders.pickle', 'wb') as f:
         pickle.dump((word_data, df, page_number, report_number), f)
 
-    df_for_saving.to_csv("report10_noverf.csv")
+    df_for_saving.to_csv("report_" + str(report_number) + ".csv")
 
 else:
 
