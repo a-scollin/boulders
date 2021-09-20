@@ -4,30 +4,6 @@ The project was a collaboration between the National Museums Scotland and the Sc
 
 Over the 6-week project I made two pieces of software to help build the database. The first was a script to analyse the reports and extract the boulders and the second was an application for verifying the boulders extracted. 
 
---- 
-
-Controller.py is the entry point for the analysis script the usage is as follows :
-
-To analyse all 10 reports - 
-> python controller.py -a 
-
-To anayse a single report - 
-
->python controller.py 
-(Will be prompted for report number)
-
-or
-
-> python controller.py x 
-(Where x is the report number)
-
-The analysis script uses OCR and spellchecking to read the reports, this usually takes a while which is why the reports word data is automatically stored after the OCR and spellcheck are complete. To analyse a word data file use the -l flag as shown below :
-
-> python controller.py -l ./path_to_file/word_data_x.pickle
-(Where path_to_file is the path to the pickle file and x is the report number) 
-
-On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app. This script is specific to these reports and will need work done to be useful on other bodies of work, note also that to run this script you must have [tesseract](https://github.com/tesseract-ocr) installed and also have the neccesary dependancies installed (NB. requirements.txt is just for the app not the analysis script).  
-
 ---
 
 To use the verification app first ensure you have the dependancies installed, I suggest you use the [virtualenv](
@@ -35,7 +11,7 @@ https://uoe-my.sharepoint.com/:f:/g/personal/s1842899_ed_ac_uk/ElLh5BTCSBBKqaK21
 
 > pip install -r requirements.txt
 
-To use the virtualenv first select your operating system by choosing to download either MacVerf (for UNIX based systems) or WindowsVerf (for Microsoft Windows) 
+To use the virtualenv first select your operating system by choosing to download either MacVerf (for UNIX based systems) or WindowsVerf (for Microsoft Windows), also make sure you have your boulder data in a nearby folder for easy navigation within the app - all the boulder data is compressed within **Archive.zip** as it is big in file size. 
 
 # MacVerf
 
@@ -69,7 +45,30 @@ Then just run the flag.py file :
 
 > python flag.py
 
+--- 
+
+Controller.py is the entry point for the analysis script the usage is as follows :
+
+To analyse all 10 reports - 
+> python controller.py -a 
+
+To anayse a single report - 
+
+>python controller.py 
+(Will be prompted for report number)
+
+or
+
+> python controller.py x 
+(Where x is the report number)
+
+The analysis script uses OCR and spellchecking to read the reports, this usually takes a while which is why the reports word data is automatically stored after the OCR and spellcheck are complete. To analyse a word data file use the -l flag as shown below :
+
+> python controller.py -l ./path_to_file/word_data_x.pickle
+(Where path_to_file is the path to the pickle file and x is the report number) 
+
+On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app. This script is specific to these reports and will need work done to be useful on other bodies of work, note also that to run this script you must have [tesseract](https://github.com/tesseract-ocr) installed and also have the neccesary dependancies installed (NB. requirements.txt is just for the app not the analysis script).  
 
 --- 
 
-The app itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
+The app itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk 
