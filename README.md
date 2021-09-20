@@ -26,7 +26,7 @@ The analysis script uses OCR and spellchecking to read the reports, this usually
 > python controller.py -l ./path_to_file/word_data_x.pickle
 (Where path_to_file is the path to the pickle file and x is the report number) 
 
-On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app.
+On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app. This script is specific to these reports and will need work done to be useful on other bodies of work, note also that to run this script you must have [tesseract](https://github.com/tesseract-ocr) installed and also have the neccesary dependancies installed (NB. requirements.txt is just for the app not the analysis script).  
 
 ---
 
