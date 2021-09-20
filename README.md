@@ -72,4 +72,4 @@ Then just run the flag.py file :
 
 --- 
 
-The program itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
+The program itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
