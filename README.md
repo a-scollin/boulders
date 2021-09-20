@@ -18,12 +18,12 @@ To anayse a single report -
 
 or
 
->> python controller.py x 
+> python controller.py x 
 (Where x is the report number)
 
 The analysis script uses OCR and spellchecking to read the reports, this usually takes a while which is why the reports word data is automatically stored after the OCR and spellcheck are complete. To analyse a word data file use the -l flag as shown below :
 
->>python controller.py -l ./path_to_file/word_data_x.pickle
+> python controller.py -l ./path_to_file/word_data_x.pickle
 (Where path_to_file is the path to the pickle file and x is the report number) 
 
 On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app.
@@ -33,7 +33,7 @@ On completion of any of the above commands a report_x_boulders.pickle file will 
 To use the verification app first ensure you have the dependancies installed, I suggest you use the [virtualenv](
 https://uoe-my.sharepoint.com/:f:/g/personal/s1842899_ed_ac_uk/ElLh5BTCSBBKqaK212n02OsBuBGHEy9q-fRegr-5r-CoZA?e=p24Ewv) linked, however you can still manually install the dependancies in requirements.txt as shown:
 
->> pip install -r requirements.txt
+> pip install -r requirements.txt
 
 To use the virtualenv first select your operating system by choosing to download either MacVerf (for UNIX based systems) or WindowsVerf (for Microsoft Windows) 
 
@@ -43,15 +43,15 @@ To begin open terminal. This can be done by hitting Command(⌘) + Spacebar and 
 
 Navigate to the MacVerf folder you downloaded using :
 
->>cd /path/to/MacVerf
+> cd /path/to/MacVerf
 
 Then change the source by entering this command :
 
->>source ./verf_env/bin/activate
+> source ./verf_env/bin/activate
 
 Then just run the flag.py file :
 
->>python flag.py
+> python flag.py
 
 # WindowVerf
 
@@ -59,17 +59,17 @@ To begin open the command prompt. This can be done by hitting Win + R and typing
 
 Navigate to the WindowsVerf folder you downloaded using :
 
->>cd C:\path\to\WindowsVerf
+> cd C:\path\to\WindowsVerf
 
 Then change the source by entering this command :
 
->>\env\Scripts\activate
+> \env\Scripts\activate
 
 Then just run the flag.py file :
 
->>python flag.py
+> python flag.py
 
 
 --- 
 
-The program itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
+The app itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
