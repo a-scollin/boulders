@@ -2,7 +2,7 @@
 
 The project was a collaboration between the National Museums Scotland and the School of GeoSciences at The University of Edinburgh. The main objective of this project was to develop a 21st century database from 9 volumes of historical reports published by the Royal Society of Edinburgh “Boulder committee” between 1871 and 1884. This database would be used to assess glacial reconstructions by focusing on boulders of a rock-type differing from the rock-type where they are found (ie. their situ). 
 
-Over the 6-week project I made two pieces of software to help build the database. The first was a script to analyse the reports and extract the boulders and the second, was an application for verifying the boulders extracted. 
+Over the 6-week project I made two pieces of software to help build the database. The first was a script to analyse the reports and extract the boulders and the second was an application for verifying the boulders extracted. 
 
 --- 
 
