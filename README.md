@@ -6,44 +6,17 @@ Over the 6-week project I made two pieces of software to help build the database
 
 ---
 
-To use the verification app first ensure you have the dependancies installed, I suggest you use the [virtualenv](
-https://uoe-my.sharepoint.com/:f:/g/personal/s1842899_ed_ac_uk/ElLh5BTCSBBKqaK212n02OsBuBGHEy9q-fRegr-5r-CoZA?e=p24Ewv) linked, however you can still manually install the dependancies in requirements.txt as shown:
+To use the verification app first ensure that you have [python3](https://www.python.org/downloads/) installed.
+
+Then install the dependancies in requirements.txt as shown:
 
 > pip install -r requirements.txt
 
-To use the virtualenv first select your operating system by choosing to download either MacVerf (for UNIX based systems) or WindowsVerf (for Microsoft Windows), also make sure you have your boulder data in a nearby folder for easy navigation within the app - all the boulder data is compressed within **Archive.zip** as it is big in file size. 
+Also make sure you have your boulder data in a nearby folder for easy navigation within the app - all the boulder data is compressed within [**Archive.zip**](https://uoe-my.sharepoint.com/:f:/g/personal/s1842899_ed_ac_uk/ElLh5BTCSBBKqaK212n02OsBuBGHEy9q-fRegr-5r-CoZA?e=3zW0zB) as it is big in file size. 
 
-# MacVerf
+Running the app after this is simple:
 
-To begin open terminal. This can be done by hitting Command(⌘) + Spacebar and searching for "terminal"
-
-Navigate to the MacVerf folder you downloaded using :
-
-> cd /path/to/MacVerf
-
-Then change the source by entering this command :
-
-> source ./verf_env/bin/activate
-
-Then just run the flag.py file :
-
-> python flag.py
-
-# WindowVerf
-
-To begin open the command prompt. This can be done by hitting Win + R and typing in "cmd" and pressing enter. 
-
-Navigate to the WindowsVerf folder you downloaded using :
-
-> cd C:\path\to\WindowsVerf
-
-Then change the source by entering this command :
-
-> \env\Scripts\activate
-
-Then just run the flag.py file :
-
-> python flag.py
+>python flag.py
 
 --- 
 
@@ -71,4 +44,4 @@ On completion of any of the above commands a report_x_boulders.pickle file will 
 
 --- 
 
-The app itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements.txt as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk 
+any problems don't hesitate to contact me at andrewscollin@hotmail.co.uk 
