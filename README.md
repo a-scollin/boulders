@@ -9,11 +9,11 @@ Over the 6-week project I made two pieces of software to help build the database
 Controller.py is the entry point for the analysis script the usage is as follows :
 
 To analyse all 10 reports - 
->> python controller.py -a 
+> python controller.py -a 
 
 To anayse a single report - 
 
->>python controller.py 
+>python controller.py 
 (Will be prompted for report number)
 
 or
