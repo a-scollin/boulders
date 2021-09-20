@@ -1,59 +1,75 @@
-# boulders !
+# Boulders! 
 
-"14/06" 
+The project was a collaboration between the National Museums Scotland and the School of GeoSciences at The University of Edinburgh. The main objective of this project was to develop a 21st century database from 9 volumes of historical reports published by the Royal Society of Edinburgh “Boulder committee” between 1871 and 1884. This database would be used to assess glacial reconstructions by focusing on boulders of a rock-type differing from the rock-type where they are found (ie. their situ). 
 
-Added a few components to make the software more sophisticated before attempting to apply NLP techniques.
+Over the 6-week project I made two pieces of software to help build the database. The first was a script to analyse the reports and extract the boulders and the second, was an application for verifying the boulders extracted. 
 
-+ Added helper functions for the OCR package allowing easy analysis of multiple records at a time. The data collected from these functions will export as a pandas.DataFrame which can be used in functions for training purposes (conf - confidence) and for the pygame manual verification software (x,y coords relative to each image for displaying the original scanned texts)
+--- 
 
-+ I thought I'd start incorporating a simple spellchecker. By scraping wikipedia articles we will be able to build a dictionary of many scottish lochs which would be useful for later down the line when we encounter spelling mistakes from italics. Will work on lower confidence guesses from the OCR.
+Controller.py is the entry point for the analysis script the usage is as follows :
 
-"15/06"
+To analyse all 10 reports - 
+>> python controller.py -a 
 
-Started applying NLP techniques and added preprocessing and more regex 
+To anayse a single report - 
 
-+ Added NLP_helper which is now coded with simple NER to pick out locations and will be used for POS tagging later down the line.
+>>python controller.py 
+(Will be prompted for report number)
 
-+ Added a function in OCR_helper which pre processes each page before being OCR'ed.. I think this will increase the accuracy of the OCR by alot meaning once the spell checker has ran through there should be little error meaning the OCR may not need trained!  
+or
 
-+ Started using alot of regex to pick out the numbered boulders and their sizes.. More work to be done for looking up sizes however as alot of them are stated in english which will require more NLP. 
+>> python controller.py x 
+(Where x is the report number)
 
-"16-18/06"
+The analysis script uses OCR and spellchecking to read the reports, this usually takes a while which is why the reports word data is automatically stored after the OCR and spellcheck are complete. To analyse a word data file use the -l flag as shown below :
 
-+ Fixed the spellchecker and started adding some interesting terms to increase the accuracy, the custom dictionary and spellchecker works seemingly quite well just from inspecting the corrections the system makes.
+>>python controller.py -l ./path_to_file/word_data_x.pickle
+(Where path_to_file is the path to the pickle file and x is the report number) 
 
-+ I cleaned up the code a bit, it could definitly use some comments though, so I'll probably do that over the weekend. 
+On completion of any of the above commands a report_x_boulders.pickle file will be generated along with a csv file with the boulders found. This pickle file is formatted to work in the app.
 
-+ Researched the flair NLP library and NLP in general, I think right now a better idea than making a generalised unsupervised model that magically does everything, is to start making training data for the named entity recognition that would be able to recognise **different boulders** mentioned in the same body of text. https://medium.com/thecyphy/training-custom-ner-model-using-flair-df1f9ea9c762 I'm still not sure if I can introduce new tags into the NER labeling and it's quite hard to wrap my head around but I think with more research it will work well. This will be very important for the boulders that aren't numbered as the current system wouldn't even consider them. It is also useful for ambiguity in numbered boulders when other smaller boulders are mentioned.
+---
 
-+ I had a few ideas about how to retrieve more accurate size, location and rocktype data as well:
+To use the verification app first ensure you have the dependancies installed, I suggest you use the [virtualenv](
+https://uoe-my.sharepoint.com/:f:/g/personal/s1842899_ed_ac_uk/ElLh5BTCSBBKqaK212n02OsBuBGHEy9q-fRegr-5r-CoZA?e=p24Ewv) linked, however you can still manually install the dependancies in requirements.txt as shown:
 
-Size
-=
-After looking at the records more I notice that the sizes are usually mentioned either in the first sentence or in a sentence of their own, this means I can just look for key words like height, length, width or breadth and flag the sentence to be considered for a special size analysis within the find_size function. This should be simple enough to do from the way I've laid out each function and class. 
+>> pip install -r requirements.txt
 
-20/06
+To use the virtualenv first select your operating system by choosing to download either MacVerf (for UNIX based systems) or WindowsVerf (for Microsoft Windows) 
 
-I've added more to find_size so that it now will return the size for sentences that mention length and breadth which works in quite a few cases, also implemented a "span" variable that helps when looking at ambiguous or old timey speech, basically it creates a window around the mention of breadth length or height and looks for a p-o-s CD tag indicating a number, if the tag that it finds is already used it won't use it straight away rather only until its searched 8 words behind and in front of the mention. This works really well however I'll need to add a few more words to recognise such as "width", "high" and a few others.
+# MacVerf
 
-Location
-=
-Although I've improved the accuracy of the location selection from the named entity recognition, some locations are far too broad.. for example they just describe the area of one of the boulders as Ayrshire which is massive. To remedy this I was thinking of doing the same thing for compass directions as above, where I would flag up sentences mentioning NW N .viz and such. This is a simple solution and hopefully should be easy to implement, however there is another challenge with contextual locations, 3/13 boulders mentioned in the 3rd report have locations referenced from other paragaphs, ie they mention "along the same path" or "this place" which is quite hard to determine, I think these will have to be self validated in the end unless I get a really good idea. 
+To begin open terminal. This can be done by hitting Command(⌘) + Spacebar and searching for "terminal"
 
-20/06
+Navigate to the MacVerf folder you downloaded using :
 
-I've looked into the location tagging more and there isn't really an elagant solution to get accurate locations outside of the cases where we would have compass directions and units of measurement. I've looked over the reports and the county should be simple enough to pull out as it's a placename that is in uppercase lettering however when talking about more specific areas it might be benfificial to just make a nice piece of verification software that would have the original text snippet and the general area meaning I could then just go through to manually do it. I'm currently just trying to get a simple python package that would let me do this as Pygame isn't working on my machine atm :/
+>>cd /path/to/MacVerf
 
-Rocktype
-=
-The hardest part with getting accurate rock types is when multiple boulders or landscapes are mentioned in the same sentence, usually choosing the first mentioned rock type will get the boulder in questions rock type however this isn't always the case, especially when talking about a boulder on some clay terrain where the 1800's way of speaking even confuses me. I was thinking of making a rating system based on word frequencies in which - down the line - after multiple volumes have been scanned, the script from each can be filtered by rock type and word apperences (frequencies) to get the most common boulder types, then any collisions in rating can just be manually decided.    
+Then change the source by entering this command :
 
-These ideas won't take too long to implement but they will take a while to perfect, and as these are the three main features of the boulder they are very important to classify accurately. 
+>>source ./verf_env/bin/activate
+
+Then just run the flag.py file :
+
+>>python flag.py
+
+# WindowVerf
+
+To begin open the command prompt. This can be done by hitting Win + R and typing in "cmd" and pressing enter. 
+
+Navigate to the WindowsVerf folder you downloaded using :
+
+>>cd C:\path\to\WindowsVerf
+
+Then change the source by entering this command :
+
+>>\env\Scripts\activate
+
+Then just run the flag.py file :
+
+>>python flag.py
 
 
-Verification and supervised training - 21/06
-===
+--- 
 
-Going to work on making a corpus of training data for the named entity recognition that will accuratley label boulders mentioned in the same body of text. To do this I will first make a complete and accurate database of the 3rd and 4th reports by manually verifiying the software I've already written. I will make a UI that displays the pdf section from which the text was read in from and then I can either clear it ( ie tags and information are good ), alter it ( ie partially correct POS/information however some inaccuracys ) or reject it ( will go back at end to completly change it ). Since pygame isn't working well on my machine I'm going to try and do this using Kivy which I'm not as familiar with but it shouldn't be too hard as it's a simple UI component I'm thinking of...
-
-
+The program itself has instructions on usage. If you run into any problems whilst using the virtualenv's install [python3](https://www.python.org/downloads/) and the requirements as shown above and try again; any other problems don't hesitate to contact me at andrewscollin@hotmail.co.uk
