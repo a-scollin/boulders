@@ -1,10 +1,5 @@
-from types import TracebackType
 from kivy.lang import Builder
 from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.graphics import Rectangle
-from kivy.graphics import Color
-from kivy.graphics import Point
 from kivy.properties import NumericProperty, ObjectProperty, StringProperty, ColorProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
@@ -14,7 +9,6 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
 import pandas as pd
 from kivy.config import Config
 Config.set('kivy', 'exit_on_escape', '0')
@@ -131,7 +125,7 @@ class VerfScreen(Screen):
     def export_csv(self,e):
         
         
-        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Volume': [], 'Weight': [], 'HASL': [], 'Compass': [], 'Distance': [], 'Rocktype' : [], 'Page_Number' : [], 'Extra' : [], 'BNum' : [], 'Author' : [], 'Verified' : [], 'par_num': []}
+        d = {'Numbers' : [], 'Location': [], 'Size' : [], 'Volume': [], 'Weight': [], 'HASL': [], 'Compass': [], 'Distance': [], 'Rocktype' : [], 'Extra' : [], 'BNum' : [], 'Author' : [], 'Verified' : [], 'Page_Number' : [], 'par_num': []}
 
 
         for boulder in self.array:
@@ -148,12 +142,15 @@ class VerfScreen(Screen):
             d['HASL'].append(boulder[0]['HASL'])
             d['Compass'].append(boulder[0]['Compass'])
             d['Distance'].append(boulder[0]['Distance'])
+            d['par_num'].append(boulder[0]['par_num'])
             d['Verified'].append(boulder[3])
 
 
+        
+
         df = pd.DataFrame(data=d)
 
-        df.to_csv(input("Please input the filename :"))
+        df.to_csv(self.path+".csv")
         
 
     def export_pdf(self,e):
@@ -228,7 +225,7 @@ class VerfScreen(Screen):
 
             index += 1 
 
-        pages[0].save("export.pdf", save_all=True, append_images=pages[1:])
+        pages[0].save(self.path+".pdf", save_all=True, append_images=pages[1:])
 
     def setup(self, path):
         
