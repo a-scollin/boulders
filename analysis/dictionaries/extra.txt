@@ -1,0 +1,11 @@
+clay
+gravel
+pebble
+pebbles
+knoll
+knolls
+sand
+shingle
+bed
+bank
+stratified

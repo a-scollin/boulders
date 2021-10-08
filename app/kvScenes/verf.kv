@@ -1,0 +1,169 @@
+<LandingScreen>:
+    name: '_landing_screen_'
+    id: first_screen
+    
+    BoxLayout:
+        orientation: "vertical"
+        id: filemanager
+        Label: 
+            id: landing_title
+            size_hint: (1.0,0.2)
+            text: "Please choose your pickle file for verification :"
+        FileChooserListView:
+            size_hint: (1.0,0.8)
+            id: filechooser
+            path: "./"
+            on_selection: app.path = self.selection and self.selection[0] or ''
+    BoxLayout:
+        orientation: "horizontal"
+        id: first_screen_boxlayout
+        size_hint: (1.0,0.1)
+        Button:
+            text: 'Start!'
+            on_press : app.start_verf() 
+       
+
+
+<VerfScreen>:
+    name: '_verf_screen_'
+    id: verf_screen
+    BoxLayout:
+        orientation: "vertical"
+        id: verf_screen_boxlayout
+        
+        BoxLayout:
+            orientation: "horizontal"
+            id: attributes_labels
+            size_hint: (1,0.2)
+            padding_bottom: 0.2
+            Label:
+                id: boulder_title
+                text_size: self.size
+                text: root.boulder_number
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: verf_title
+                color : root.verf_colour
+                text: root.verf
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: page_title
+                text: root.page_number
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: location_title
+                text: root.current_location
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: rocktype_title
+                text: root.current_rocktype
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: size_title
+                text: root.current_size
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: bnum_title
+                text: root.current_bnum
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: ext_title
+                text: root.current_ext
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            Label:
+                id: aut_title
+                text: root.current_aut
+                text_size: self.size
+                font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+            
+
+               
+                
+        BoxLayout:
+            id: image_box_layout
+            orientation : "horizontal"
+            ScrollView:
+                Image:
+                    id: kk
+                    size_hint : (1, 1)
+                    texture: root.beeld.texture
+            BoxLayout:
+                id: image_box_layout
+                orientation : "vertical"     
+                GridLayout:
+                    id: image_Grid_layout
+                    rows : 2
+                    col : 3
+                    padding: [0, 0, 0, 2] 
+                    Label:
+                        id: vol_title
+                        text_size: self.size
+                        text: root.current_volume
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: weight_title
+                        text_size: self.size
+                        text: root.current_weight
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: hasl_title
+                        text_size: self.size
+                        text: root.current_hasl
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: compass_title
+                        text_size: self.size
+                        text: root.current_compass
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: distance_title
+                        text_size: self.size
+                        text: root.current_distance
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                    Label:
+                        id: par_num_title
+                        text_size: self.size
+                        text: root.current_par_num
+                        font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+                TextInput:
+                    id: verf_text
+                    text: root.currenttext
+                    focus: True 
+                    font_name: '/System/Library/Fonts/Supplemental/Times New Roman.ttf'
+        BoxLayout:
+            id: button_boxlayout
+            orientation: "horizontal"
+            padding: 10
+            size_hint: (1, 0.15)
+            Button:
+                id: accept_button
+                text: "<"
+                size_hint: (0.25, 1)
+                on_press: root.go_back()
+            Button:
+                id: bad_button
+                text: "Bad"
+                size_hint: (0.25, 1)
+                on_press: root.bad_boulder(False)
+            Button:
+                id: save
+                text: "Save Progress"
+                size_hint: (0.25,1)
+                on_press: root.save_progress()
+            Button:
+                id: good_button
+                text: "Good"
+                size_hint: (0.25, 1)
+                on_press: root.good_boulder(False)
+            Button:
+                id: cancel_button
+                text: ">"
+                size_hint: (0.25, 1) 
+                on_press: root.go_forward()
